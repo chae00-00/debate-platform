@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./capstone_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  app:
+    build: ./debate-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/debate_db
+      - SPRING_DATASOURCE_USERNAME=debate_user
+      - SPRING_DATASOURCE_PASSWORD=debate_pass
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=debate_db
+      - POSTGRES_USER=debate_user
+      - POSTGRES_PASSWORD=debate_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U debate_user -d debate_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

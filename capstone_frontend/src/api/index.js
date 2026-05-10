@@ -1,0 +1,14 @@
+// 배포: 빈 문자열 → nginx 프록시 사용
+// 로컬: VITE_API_URL=http://localhost:8080
+export const BASE_URL = import.meta.env.VITE_API_URL || '';
+
+export const buildApiUrl = (path) => `${BASE_URL}${path}`;
+
+export const apiFetch = async (path, options = {}) => {
+  const res = await fetch(buildApiUrl(path), {
+    headers: { 'Content-Type': 'application/json', ...options.headers },
+    ...options,
+  });
+  if (!res.ok) throw new Error(`API error ${res.status}: ${path}`);
+  return res.json();
+};
