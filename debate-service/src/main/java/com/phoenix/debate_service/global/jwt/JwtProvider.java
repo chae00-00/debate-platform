@@ -10,7 +10,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-// @Component  // 로그인 기능 비활성화 (도메인 없음)
+@Component
 public class JwtProvider {
 
     private final SecretKey secretKey;
