@@ -52,12 +52,10 @@ const BrandLogos = () => (
 
 const Login = ({ onLogin, onSkip }) => {
   const handleSocialLogin = (providerId) => {
-    const oauthUrls = {
-      kakao: 'http://localhost:8080/oauth2/authorization/kakao',
-      naver: 'http://localhost:8080/oauth2/authorization/naver',
-      google: 'http://localhost:8080/oauth2/authorization/google',
-    };
-    window.location.href = oauthUrls[providerId];
+    const baseUrl = window.location.hostname === 'localhost'
+      ? 'http://localhost:8080'
+      : 'http://debate-mate.ai.kr';
+    window.location.href = `${baseUrl}/oauth2/authorization/${providerId}`;
   };
 
   return (

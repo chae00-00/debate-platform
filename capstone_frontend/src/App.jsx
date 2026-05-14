@@ -20,11 +20,13 @@ import PostDebateStats from './pages/PostDebateStats';
 import FinalEvaluation from './pages/FinalEvaluation';
 import DebateTutorialModal from './components/DebateTutorialModal';
 import Login from './pages/Login';
+import OAuthCallback from './pages/OAuthCallback';
 import { prepareDebate } from './api/debatesApi';
 
 const App = () => {
   const getInitialRoute = () => {
     if (window.location.pathname === '/login') return '/login';
+    if (window.location.pathname === '/oauth/callback') return '/oauth/callback';
     if (window.location.pathname === '/topics') return '/topics';
     if (window.location.pathname === '/debate') return '/debate';
     if (window.location.pathname === '/post-quiz') return '/post-quiz';
@@ -58,6 +60,7 @@ const App = () => {
   const activeProAiCount = userStance === 'pro' ? agentCount - 1 : agentCount;
   const activeConAiCount = userStance === 'con' ? agentCount - 1 : agentCount;
   const isLoginRoute = routePath === '/login';
+  const isOAuthCallbackRoute = routePath === '/oauth/callback';
   const isTopicSelectionRoute = routePath === '/topics';
   const isDebateRoute = routePath === '/debate';
   const isPostQuizRoute = routePath === '/post-quiz';
@@ -256,7 +259,11 @@ const App = () => {
         />
       )}
 
-      {!isLoginRoute && !isTopicSelectionRoute && !isDebateRoute && !isPostQuizRoute && !isStatsRoute && !isEvaluationRoute && !activeTopic && (
+      {isOAuthCallbackRoute && (
+        <OAuthCallback onSuccess={() => navigate('/')} />
+      )}
+
+      {!isLoginRoute && !isOAuthCallbackRoute && !isTopicSelectionRoute && !isDebateRoute && !isPostQuizRoute && !isStatsRoute && !isEvaluationRoute && !activeTopic && (
         <HomeLanding onCreateDebate={() => navigate('/topics')} />
       )}
 

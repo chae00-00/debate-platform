@@ -41,5 +41,9 @@ jwt:
   secret: ${JWT_SECRET:default-secret-key-for-development-only-change-in-production}
   expiration: 86400000
 
+app:
+  oauth2:
+    redirect-uri: ${OAUTH_REDIRECT_URI:http://localhost:5173/oauth/callback}
+
 fastapi:
   url: ${FASTAPI_URL:https://complimentary-character-con-kevin.trycloudflare.com}
