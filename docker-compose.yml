@@ -20,6 +20,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/debate_db
       - SPRING_DATASOURCE_USERNAME=debate_user
       - SPRING_DATASOURCE_PASSWORD=debate_pass
+      - OAUTH_REDIRECT_URI=http://debate-mate.ai.kr/oauth/callback
     restart: unless-stopped
 
   postgres:
