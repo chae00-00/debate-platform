@@ -25,6 +25,7 @@ services:
       - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
       - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
       - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
+      - FASTAPI_URL=${FASTAPI_URL}
     restart: unless-stopped
 
   postgres:
