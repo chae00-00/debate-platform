@@ -21,6 +21,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=debate_user
       - SPRING_DATASOURCE_PASSWORD=debate_pass
       - OAUTH_REDIRECT_URI=http://debate-mate.ai.kr/oauth/callback
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
+      - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
     restart: unless-stopped
 
   postgres:

@@ -14,12 +14,22 @@ jobs:
 
       - name: Deploy to GCE
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
         with:
           host: ${{ secrets.GCE_HOST }}
           username: ${{ secrets.GCE_USERNAME }}
           key: ${{ secrets.GCE_SSH_KEY }}
+          envs: KAKAO_CLIENT_ID,KAKAO_CLIENT_SECRET,NAVER_CLIENT_ID,NAVER_CLIENT_SECRET
           script: |
             cd ~/debate-platform
             git pull origin ${{ github.ref_name }}
+            export KAKAO_CLIENT_ID=$KAKAO_CLIENT_ID
+            export KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET
+            export NAVER_CLIENT_ID=$NAVER_CLIENT_ID
+            export NAVER_CLIENT_SECRET=$NAVER_CLIENT_SECRET
             docker-compose down
             docker-compose up -d --build

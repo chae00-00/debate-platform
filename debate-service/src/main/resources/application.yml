@@ -7,15 +7,15 @@ spring:
       client:
         registration:
           kakao:
-            client-id: 3ed01edc8e7f9d8bb4c064d0bc5e650b
-            client-secret: 923EBwi1ZDIjnHhKwslnOrD5HKag7iXu
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET}
             redirect-uri: http://debate-mate.ai.kr/login/oauth2/code/kakao
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
             scope: profile_nickname
           naver:
-            client-id: sX9ErO33CvazGjfoP7ie
-            client-secret: GF4blB0_R9
+            client-id: ${NAVER_CLIENT_ID}
+            client-secret: ${NAVER_CLIENT_SECRET}
             redirect-uri: http://debate-mate.ai.kr/login/oauth2/code/naver
             authorization-grant-type: authorization_code
             scope: name
