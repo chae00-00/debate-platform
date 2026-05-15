@@ -2,6 +2,15 @@ import { useState, useEffect } from 'react';
 import { SendHorizonal, Mic, Plus, X } from 'lucide-react';
 import { MAX_ARGUMENT_TABS } from './mockData';
 
+const MIN_CHARS = {
+  intro: 45,
+  argument: 100,
+  conclusion: 75,
+  stage2Turn: 130,
+  stage3: 130,
+  roleReversalArgument: 60,
+  roleReversalConclusion: 60,
+};
 
 export default function InputComposer({
   isMyTurn,
@@ -21,6 +30,7 @@ export default function InputComposer({
   const [composerIntro, setComposerIntro] = useState('');
   const [composerConclusion, setComposerConclusion] = useState('');
   const [composerArguments, setComposerArguments] = useState(['']);
+  const [validationError, setValidationError] = useState('');
 
   // stage 3 전용 상태
   const [stage3Answer, setStage3Answer] = useState('');
@@ -55,6 +65,15 @@ export default function InputComposer({
     return `${placeholderLabel}에 대해 작성해주세요.`;
   };
 
+  const getMinLength = (tabId) => {
+    if (isRoleReversalStage) {
+      return tabId === 'conclusion' ? MIN_CHARS.roleReversalConclusion : MIN_CHARS.roleReversalArgument;
+    }
+    if (tabId === 'intro') return MIN_CHARS.intro;
+    if (tabId === 'conclusion') return MIN_CHARS.conclusion;
+    return MIN_CHARS.argument;
+  };
+
   const getValue = (tabId) => {
     if (tabId === 'intro') return composerIntro;
     if (tabId === 'conclusion') return composerConclusion;
@@ -63,6 +82,7 @@ export default function InputComposer({
   };
 
   const setValue = (tabId, value) => {
+    setValidationError('');
     if (tabId === 'intro') { setComposerIntro(value); return; }
     if (tabId === 'conclusion') { setComposerConclusion(value); return; }
     if (tabId.startsWith('argument-')) {
@@ -116,6 +136,30 @@ export default function InputComposer({
     setComposerConclusion('');
     setComposerArguments(['']);
     setComposerTab('intro');
+    setValidationError('');
+  };
+
+  // ── Validation helpers ────────────────────────────────────────────────────
+  const validateOpening = () => {
+    const intro = composerIntro.trim();
+    if (intro && intro.length < MIN_CHARS.intro) return '자기소개와 입장은 최소 45자 이상 작성해주세요.';
+    for (const arg of composerArguments) {
+      const t = arg.trim();
+      if (t && t.length < MIN_CHARS.argument) return '논거는 최소 100자 이상 작성해주세요.';
+    }
+    const conclusion = composerConclusion.trim();
+    if (conclusion && conclusion.length < MIN_CHARS.conclusion) return '결론은 최소 75자 이상 작성해주세요.';
+    return '';
+  };
+
+  const validateRoleReversal = () => {
+    for (const arg of composerArguments) {
+      const t = arg.trim();
+      if (t && t.length < MIN_CHARS.roleReversalArgument) return `논거는 최소 ${MIN_CHARS.roleReversalArgument}자 이상 작성해주세요.`;
+    }
+    const conclusion = composerConclusion.trim();
+    if (conclusion && conclusion.length < MIN_CHARS.roleReversalConclusion) return `결론은 최소 ${MIN_CHARS.roleReversalConclusion}자 이상 작성해주세요.`;
+    return '';
   };
 
   // ── Stage 1 전송 ──────────────────────────────────────────────────────────
@@ -123,6 +167,9 @@ export default function InputComposer({
     if (!onSubmitOpening || openingLoading || openingSubmitted) return;
     const content = buildOpeningContent();
     if (!content) return;
+    const err = validateOpening();
+    if (err) { setValidationError(err); return; }
+    setValidationError('');
     try {
       await onSubmitOpening(content);
       clearComposer();
@@ -134,6 +181,9 @@ export default function InputComposer({
     if (!onSubmitTurn) return;
     const content = buildRoleReversalContent();
     if (!content) return;
+    const err = validateRoleReversal();
+    if (err) { setValidationError(err); return; }
+    setValidationError('');
     onSubmitTurn(content);
     clearComposer();
   };
@@ -147,14 +197,28 @@ export default function InputComposer({
 
     if (!stage3CanAttack) {
       if (!answer) return;
+      if (answer.length < MIN_CHARS.stage3) {
+        setValidationError(`답변은 최소 ${MIN_CHARS.stage3}자 이상 작성해주세요.`);
+        return;
+      }
+      setValidationError('');
       onSubmitTurn(answer);
       setStage3Answer('');
       setStage3Attack('');
       return;
     }
 
+    if (answer && answer.length < MIN_CHARS.stage3) {
+      setValidationError(`답변은 최소 ${MIN_CHARS.stage3}자 이상 작성해주세요.`);
+      return;
+    }
+    if (attack && attack.length < MIN_CHARS.stage3) {
+      setValidationError(`공격은 최소 ${MIN_CHARS.stage3}자 이상 작성해주세요.`);
+      return;
+    }
+    setValidationError('');
+
     if (answer && attack) {
-      // 답변 먼저 제출, 공격은 자동으로 이어서 제출 (말풍선 2개)
       onSubmitTurn(answer, attack);
     } else {
       onSubmitTurn(answer || attack);
@@ -163,11 +227,16 @@ export default function InputComposer({
     setStage3Attack('');
   };
 
-  // ── Stage 2/4/5 전송 ─────────────────────────────────────────────────────
+  // ── Stage 2/5 전송 ───────────────────────────────────────────────────────
   const handleSendTurn = () => {
     if (!onSubmitTurn) return;
     const content = composerIntro.trim();
     if (!content) return;
+    if (currentStage === 2 && content.length < MIN_CHARS.stage2Turn) {
+      setValidationError(`발언은 최소 ${MIN_CHARS.stage2Turn}자 이상 작성해주세요.`);
+      return;
+    }
+    setValidationError('');
     onSubmitTurn(content);
     setComposerIntro('');
   };
@@ -256,10 +325,15 @@ export default function InputComposer({
               </div>
               <textarea
                 value={stage3Answer}
-                onChange={(e) => setStage3Answer(e.target.value)}
+                onChange={(e) => { setStage3Answer(e.target.value); setValidationError(''); }}
                 placeholder="상대 주장에 대한 답변을 입력하세요."
                 className="w-full min-h-[64px] max-h-[100px] resize-none bg-transparent px-4 py-2 text-[14px] font-medium text-stone-800 placeholder:text-stone-400 focus:outline-none hide-scrollbar"
               />
+              {stage3Answer.trim().length > 0 && (
+                <div className={`px-4 pb-1 text-right text-[11px] font-medium ${stage3Answer.trim().length < MIN_CHARS.stage3 ? 'text-rose-400' : 'text-stone-400'}`}>
+                  {stage3Answer.trim().length} / {MIN_CHARS.stage3}자
+                </div>
+              )}
             </div>
             {/* 공격 입력 — 활성화된 턴에만 표시 */}
             {stage3CanAttack && (
@@ -272,11 +346,19 @@ export default function InputComposer({
                 </div>
                 <textarea
                   value={stage3Attack}
-                  onChange={(e) => setStage3Attack(e.target.value)}
+                  onChange={(e) => { setStage3Attack(e.target.value); setValidationError(''); }}
                   placeholder="상대 입장의 허점을 공략하세요."
                   className="w-full min-h-[64px] max-h-[100px] resize-none bg-transparent px-4 py-2 text-[14px] font-medium text-stone-800 placeholder:text-stone-400 focus:outline-none hide-scrollbar"
                 />
+                {stage3Attack.trim().length > 0 && (
+                  <div className={`px-4 pb-1 text-right text-[11px] font-medium ${stage3Attack.trim().length < MIN_CHARS.stage3 ? 'text-rose-400' : 'text-stone-400'}`}>
+                    {stage3Attack.trim().length} / {MIN_CHARS.stage3}자
+                  </div>
+                )}
               </div>
+            )}
+            {validationError && (
+              <div className="px-4 py-2 text-[11px] font-bold text-rose-500">{validationError}</div>
             )}
           </div>
           <button
@@ -294,6 +376,9 @@ export default function InputComposer({
 
   // ── Stage 1 / Stage 4(역할반전) / 기타 단계 ──────────────────────────────
   const useStructuredForm = isOpeningStage || isRoleReversalStage;
+  const currentValue = getValue(composerTab);
+  const currentMin = getMinLength(composerTab);
+  const currentLen = currentValue.trim().length;
 
   return (
     <div className="flex flex-col gap-2">
@@ -368,19 +453,31 @@ export default function InputComposer({
                 )}
               </div>
               <textarea
-                value={getValue(composerTab)}
+                value={currentValue}
                 onChange={(e) => setValue(composerTab, e.target.value)}
                 placeholder={getPlaceholder(composerTab)}
                 className="w-full max-h-[100px] min-h-[68px] resize-none bg-transparent px-4 py-3 text-[14px] font-medium text-stone-800 placeholder:text-stone-400 focus:outline-none hide-scrollbar"
               />
+              {currentLen > 0 && (
+                <div className={`px-4 pb-2 text-right text-[11px] font-medium ${currentLen < currentMin ? 'text-rose-400' : 'text-stone-400'}`}>
+                  {currentLen} / {currentMin}자
+                </div>
+              )}
             </>
           ) : (
-            <textarea
-              value={composerIntro}
-              onChange={(e) => setComposerIntro(e.target.value)}
-              placeholder={isProSide ? '발언을 입력해주세요.' : '반박을 입력해주세요.'}
-              className="w-full min-h-[96px] resize-none bg-transparent px-4 py-3 text-[14px] font-medium text-stone-800 placeholder:text-stone-400 focus:outline-none hide-scrollbar"
-            />
+            <>
+              <textarea
+                value={composerIntro}
+                onChange={(e) => { setComposerIntro(e.target.value); setValidationError(''); }}
+                placeholder={isProSide ? '발언을 입력해주세요.' : '반박을 입력해주세요.'}
+                className="w-full min-h-[96px] resize-none bg-transparent px-4 py-3 text-[14px] font-medium text-stone-800 placeholder:text-stone-400 focus:outline-none hide-scrollbar"
+              />
+              {currentStage === 2 && composerIntro.trim().length > 0 && (
+                <div className={`px-4 pb-2 text-right text-[11px] font-medium ${composerIntro.trim().length < MIN_CHARS.stage2Turn ? 'text-rose-400' : 'text-stone-400'}`}>
+                  {composerIntro.trim().length} / {MIN_CHARS.stage2Turn}자
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -397,18 +494,22 @@ export default function InputComposer({
         </button>
       </div>
 
-      <div className="px-4 pb-2 text-[11px] font-medium text-stone-400">
-        {isOpeningStage
-          ? (openingError
-            ? `오류: ${openingError}`
-            : openingComplete
-              ? '입론 완료'
-              : openingLoading
-                ? 'AI 입론 생성 중'
-                : openingSubmitted
-                  ? '입론 제출 완료'
-                  : `논거 ${composerArguments.length}/${MAX_ARGUMENT_TABS}`)
-          : null}
+      <div className="px-4 pb-2 text-[11px] font-medium">
+        {validationError ? (
+          <span className="font-bold text-rose-500">{validationError}</span>
+        ) : isOpeningStage ? (
+          <span className="text-stone-400">
+            {openingError
+              ? `오류: ${openingError}`
+              : openingComplete
+                ? '입론 완료'
+                : openingLoading
+                  ? 'AI 입론 생성 중'
+                  : openingSubmitted
+                    ? '입론 제출 완료'
+                    : `논거 ${composerArguments.length}/${MAX_ARGUMENT_TABS}`}
+          </span>
+        ) : null}
       </div>
     </div>
   );

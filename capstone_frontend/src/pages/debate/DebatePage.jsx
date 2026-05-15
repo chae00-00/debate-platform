@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, X, Search } from 'lucide-react';
 
 const DEBATE_STORAGE_KEY = 'capstone_debate_session';
@@ -47,10 +47,6 @@ export default function DebatePage({
   const [showSearchPopup, setShowSearchPopup] = useState(!!debateParams);
   const [currentStage, setCurrentStage] = useState(1);
   const [viewStage, setViewStage] = useState(1); // 스테퍼에서 선택한 단계 (보기용)
-  const [stage1TurnIdx] = useState(3);
-  const [stage2Round]   = useState(2);
-  const [stage3Cycle]   = useState(1);
-  const [myTurnOverride, setMyTurnOverride] = useState(true);
   const [stage3Opponent, setStage3Opponent] = useState(null);
   const expectedOpponentCount = Math.max(
     1,
@@ -71,7 +67,23 @@ export default function DebatePage({
     stage3CanAttack,
     liveAnalysis,
     submitTurn,
+    pauseQueue,
+    resumeQueue,
   } = useDebateLogs(debateParams, agentCount, userStance, preparedSessionId);
+
+  // logs에서 실시간으로 진행 상황 파악 (useDebateLogs 이후에 선언)
+  const stage1SpeakerIdx = useMemo(
+    () => Math.min(logs.filter(l => l.stage === 1 && !l.moderator).length, STAGE1_ORDER.length - 1),
+    [logs],
+  );
+  const stage2RoundIdx = useMemo(
+    () => Math.min(logs.filter(l => l.stage === 2 && !l.moderator).length, STAGE2_ROUNDS.length - 1),
+    [logs],
+  );
+  const stage3CycleCount = useMemo(
+    () => Math.max(1, logs.filter(l => l.stage === 3 && l.isUser).length),
+    [logs],
+  );
 
   const summarizeOpening = (text) => {
     if (!text) return '입론 요약 정보가 없습니다.';
@@ -96,7 +108,7 @@ export default function DebatePage({
         return arr.findIndex((x) => String(x.speaker ?? x.id) === key) === index;
       })
       .map((log) => ({
-        id: String(log.speaker ?? log.id),
+        id: String(log.speakerId ?? log.speaker ?? log.id), // raw agent_id 우선
         label: String(log.speaker ?? '상대'),
         stance: summarizeOpening(log.text),
       }));
@@ -114,6 +126,26 @@ export default function DebatePage({
       setStage3Opponent(stage3Opponents[0]);
     }
   }, [currentStage, stage3Opponents, stage3Opponent, expectedOpponentCount]);
+
+  // 상대 선택 모달이 필요한 동안 AI 발언 큐 일시정지
+  // useLayoutEffect: paint 전에 동기 실행되어 타이머 취소 타이밍이 빠름
+  const pauseQueueRef = useRef(pauseQueue);
+  const resumeQueueRef = useRef(resumeQueue);
+  pauseQueueRef.current = pauseQueue;
+  resumeQueueRef.current = resumeQueue;
+
+  useLayoutEffect(() => {
+    if (currentStage === 3 && !stage3Opponent && expectedOpponentCount > 1) {
+      pauseQueueRef.current();
+    }
+  }, [currentStage, stage3Opponent, expectedOpponentCount]);
+
+  // 상대가 선택되면 큐 재개
+  useLayoutEffect(() => {
+    if (stage3Opponent) {
+      resumeQueueRef.current();
+    }
+  }, [stage3Opponent]);
 
   useEffect(() => {
     if (openingComplete) {
@@ -159,28 +191,46 @@ export default function DebatePage({
     setViewStage((prev) => (currentStage > prev ? currentStage : prev));
   }, [currentStage]);
 
-  const isMyTurn = debateParams
-    ? awaitingUserTurn
-    : (currentStage === 1 || currentStage === 3)
-      ? awaitingUserTurn
-      : (currentStage < 5 && myTurnOverride);
+  const isMyTurn = awaitingUserTurn;
   const isProSide = userStance === 'pro';
   const isRoleReversalStage = currentStage === 4;
   const effectiveIsProSide = isRoleReversalStage ? !isProSide : isProSide;
   const canUseStage3Attack = !debateParams || (waitingFor === 'user_free_rebuttal' && stage3CanAttack);
 
   const getTurnDesc = () => {
-    if (currentStage === 1) return `입론 ${stage1TurnIdx + 1}/4 — ${STAGE1_ORDER[stage1TurnIdx].label} 발언 중`;
-    if (currentStage === 2) return `연쇄 논박 ${STAGE2_ROUNDS[stage2Round].round}차 — ${STAGE2_ROUNDS[stage2Round].desc}`;
-    if (currentStage === 3) return `자유 논박 ${stage3Cycle}사이클 — 사용자 ↔ ${stage3Opponent?.label ?? STAGE3_PAIRED_AGENT_LABEL}`;
-    if (currentStage === 4) return '역할 반전 — 반대 2 (나) → 찬성측 논리 방어';
-    return '판정단 분석 진행 중';
+    const stageNames = { 1: '입론', 2: '연쇄 논박', 3: '자유 논박', 4: '역할 반전', 5: '종합' };
+    const stageName = stageNames[currentStage] ?? '진행 중';
+
+    // AI 큐가 아직 재생 중이면 waitingFor보다 isTyping을 우선
+    if (isTyping) return `${stageName} — 상대방 발언 중`;
+
+    switch (waitingFor) {
+      case 'user_opening':          return '입론 — 내 차례';
+      case 'chained_rebuttal_node': return '연쇄 논박 — 상대방 발언 중';
+      case 'user_rebuttal':         return '연쇄 논박 — 내 차례';
+      case 'free_rebuttal_node':    return '자유 논박 — 상대방 발언 중';
+      case 'user_free_rebuttal':    return '자유 논박 — 내 차례';
+      case 'role_reversal_node':    return '역할 반전 — 상대방 발언 중';
+      case 'user_role_reversal':    return '역할 반전 — 내 차례';
+      case 'synthesis_discuss_node':return '종합 — 상대방 발언 중';
+      case 'user_synthesis':        return '종합 — 내 차례';
+      case 'user_finalize':         return '최적해 제시 차례';
+      default:                      return `${stageName} — 상대방 발언 중`;
+    }
   };
 
   const getProgressInfo = () => {
-    if (currentStage === 1) return { label: `입론 ${stage1TurnIdx + 1}/${STAGE1_ORDER.length}`, pct: (stage1TurnIdx + 1) / STAGE1_ORDER.length };
-    if (currentStage === 2) return { label: `논박 ${STAGE2_ROUNDS[stage2Round].round}/4`, pct: STAGE2_ROUNDS[stage2Round].round / 4 };
-    if (currentStage === 3) return { label: `사이클 ${stage3Cycle}/${STAGE3_MAX_CYCLES}`, pct: stage3Cycle / STAGE3_MAX_CYCLES };
+    if (currentStage === 1) {
+      const done = stage1SpeakerIdx + 1;
+      return { label: `입론 ${done}/${STAGE1_ORDER.length}`, pct: done / STAGE1_ORDER.length };
+    }
+    if (currentStage === 2) {
+      const round = stage2RoundIdx + 1;
+      return { label: `논박 ${round}/${STAGE2_ROUNDS.length}`, pct: round / STAGE2_ROUNDS.length };
+    }
+    if (currentStage === 3) {
+      return { label: `사이클 ${stage3CycleCount}/${STAGE3_MAX_CYCLES}`, pct: Math.min(stage3CycleCount / STAGE3_MAX_CYCLES, 1) };
+    }
     return null;
   };
 
@@ -189,11 +239,11 @@ export default function DebatePage({
 
   const getSpeakerAnalysis = () => {
     if (currentStage === 1) {
-      const speaker = STAGE1_ORDER[stage1TurnIdx];
+      const speaker = STAGE1_ORDER[stage1SpeakerIdx];
       return ANALYSIS_BY_SPEAKER[speaker?.id] ?? ANALYSIS_BY_STAGE[1];
     }
     if (currentStage === 2) {
-      return ANALYSIS_BY_SPEAKER[`round${stage2Round + 1}`] ?? ANALYSIS_BY_STAGE[2];
+      return ANALYSIS_BY_SPEAKER[`round${stage2RoundIdx + 1}`] ?? ANALYSIS_BY_STAGE[2];
     }
     return ANALYSIS_BY_STAGE[currentStage];
   };
@@ -202,14 +252,14 @@ export default function DebatePage({
 
   const getSpeakerLabel = () => {
     if (currentStage === 1) {
-      const speaker = STAGE1_ORDER[stage1TurnIdx];
+      const speaker = STAGE1_ORDER[stage1SpeakerIdx];
       return speaker ? `입론 · ${speaker.label}` : null;
     }
     if (currentStage === 2) {
-      const round = STAGE2_ROUNDS[stage2Round];
+      const round = STAGE2_ROUNDS[stage2RoundIdx];
       return round ? `연쇄 논박 · ${round.attackerLabel}` : null;
     }
-    if (currentStage === 3) return `자유 논박 · 사이클 ${stage3Cycle}`;
+    if (currentStage === 3) return `자유 논박 · 사이클 ${stage3CycleCount}`;
     if (currentStage === 4) return '역할 반전 발언 중';
     return null;
   };
@@ -220,8 +270,8 @@ export default function DebatePage({
   // 단계별 사용자 발언 제출 (stages 2~5)
   const handleSubmitTurn = (content, pendingAttack = null) => {
     const phase = STAGE_TO_PHASE[currentStage] ?? 'opening';
-    submitTurn(content, phase, pendingAttack);
-    setMyTurnOverride(false);
+    const opponentId = currentStage === 3 ? (stage3Opponent?.id ?? null) : null;
+    submitTurn(content, phase, pendingAttack, false, opponentId);
   };
 
   const mergedLogs = logs;
@@ -369,9 +419,8 @@ export default function DebatePage({
               }}
               getTurnDesc={getTurnDesc}
               progress={progress}
+              isTyping={isTyping}
               isMyTurn={isMyTurn}
-              myTurnOverride={myTurnOverride}
-              setMyTurnOverride={setMyTurnOverride}
             />
             <AnalysisPanel
               showLiveAnalysis={showLiveAnalysis}
