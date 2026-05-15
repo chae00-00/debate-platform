@@ -27,9 +27,9 @@ jobs:
           script: |
             cd ~/debate-platform
             git pull origin ${{ github.ref_name }}
-            export KAKAO_CLIENT_ID=$KAKAO_CLIENT_ID
-            export KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET
-            export NAVER_CLIENT_ID=$NAVER_CLIENT_ID
-            export NAVER_CLIENT_SECRET=$NAVER_CLIENT_SECRET
+            echo "KAKAO_CLIENT_ID=$KAKAO_CLIENT_ID" > .env
+            echo "KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET" >> .env
+            echo "NAVER_CLIENT_ID=$NAVER_CLIENT_ID" >> .env
+            echo "NAVER_CLIENT_SECRET=$NAVER_CLIENT_SECRET" >> .env
             docker-compose down
             docker-compose up -d --build
