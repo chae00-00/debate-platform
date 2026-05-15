@@ -8,9 +8,8 @@ export default function StepperPanel({
   onScrollToStage,
   getTurnDesc,
   progress,
+  isTyping,
   isMyTurn,
-  myTurnOverride,
-  setMyTurnOverride,
 }) {
   return (
     <section className="rounded-[32px] border border-white/80 bg-white/60 px-5 py-4 backdrop-blur-md shadow-[0_12px_32px_rgba(0,0,0,0.04)] flex flex-col gap-2">
@@ -45,7 +44,7 @@ export default function StepperPanel({
         })}
       </div>
 
-      {/* 현재 턴 + 진행도 + 내 차례 뱃지 */}
+      {/* 현재 단계 설명 + 진행도 */}
       <div className="flex items-center gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 text-[12px] font-bold text-stone-600 flex-1 min-w-0">
           <Users size={12} className="shrink-0" />
@@ -62,22 +61,27 @@ export default function StepperPanel({
             <span className="text-[11px] font-semibold text-stone-400">{progress.label}</span>
           </div>
         )}
-        {isMyTurn ? (
-          <span className="text-[11px] font-extrabold text-white bg-stone-800 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-md shrink-0">
-            <Mic size={11} /> 내 차례
-          </span>
-        ) : (
-          <span className="text-[11px] font-bold text-stone-500 bg-stone-100/80 border border-stone-200/50 px-2.5 py-0.5 rounded-full shrink-0">
-            대기 중
-          </span>
-        )}
-        <button
-          onClick={() => setMyTurnOverride((v) => !v)}
-          className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white/80 shadow-sm text-stone-500 hover:bg-white transition-colors border border-stone-100 shrink-0"
-        >
-          {myTurnOverride ? '내 턴' : '상대 턴'}
-        </button>
       </div>
+
+      {/* 현재 발언자 실시간 표시 */}
+      {isTyping ? (
+        <div className="flex items-center gap-1.5 text-[11px] font-bold text-stone-500">
+          <Mic size={11} className="animate-subtle-pulse shrink-0" />
+          <span>상대방 발언 중</span>
+          <span className="flex gap-0.5 shrink-0">
+            <span className="w-1 h-1 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-1 h-1 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-1 h-1 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          </span>
+        </div>
+      ) : isMyTurn ? (
+        <div className="flex items-center gap-1.5 text-[11px] font-bold text-stone-700">
+          <Mic size={11} className="shrink-0" />
+          <span>내 차례</span>
+        </div>
+      ) : (
+        <div className="text-[11px] font-medium text-stone-400">상대방 발언 중</div>
+      )}
     </section>
   );
 }

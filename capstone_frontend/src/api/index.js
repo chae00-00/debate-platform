@@ -1,6 +1,4 @@
-// 배포: 빈 문자열 → nginx 프록시 사용
-// 로컬: VITE_API_URL=http://localhost:8080
-export const BASE_URL = import.meta.env.VITE_API_URL || '';
+export const BASE_URL = 'http://localhost:8080';
 
 export const buildApiUrl = (path) => `${BASE_URL}${path}`;
 

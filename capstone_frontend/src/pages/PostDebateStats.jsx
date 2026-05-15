@@ -291,20 +291,32 @@ export default function PostDebateStats({ onBack = () => {}, onNext = () => {} }
 
         <div className="mb-5 rounded-[36px] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,245,244,0.94))] px-7 py-8 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
           <p className="mb-1 text-center text-[22px] font-extrabold tracking-tight text-stone-900">종합 점수</p>
-          <p className="mb-6 text-center text-[18px] font-bold text-stone-700">{loading ? '분석 중...' : verdict}</p>
-          <div className="flex items-center justify-around gap-6">
-            <SingleGauge score={scoreBefore} label="사전" isGray />
-            <div className="flex flex-col items-center gap-2">
-              <div className={`flex items-center ${totalDelta > 0 ? 'text-emerald-500' : totalDelta < 0 ? 'text-rose-400' : 'text-stone-400'}`}>
-                <ChevronRight size={52} strokeWidth={3} />
-                <ChevronRight size={52} strokeWidth={3} className="-ml-8" />
+          {loading || !evalData ? (
+            <p className="py-10 text-center text-[15px] font-bold text-stone-400 animate-pulse">계산중입니다...</p>
+          ) : (
+            <>
+              <p className="mb-6 text-center text-[18px] font-bold text-stone-700">{verdict}</p>
+              <div className="flex items-center justify-around gap-6">
+                <SingleGauge score={scoreBefore} label="사전" isGray />
+                <div className="flex flex-col items-center gap-2">
+                  <div className={`flex items-center ${totalDelta > 0 ? 'text-emerald-500' : totalDelta < 0 ? 'text-rose-400' : 'text-stone-400'}`}>
+                    <ChevronRight size={52} strokeWidth={3} />
+                    <ChevronRight size={52} strokeWidth={3} className="-ml-8" />
+                  </div>
+                </div>
+                <SingleGauge score={scoreAfter} label="사후" />
               </div>
-            </div>
-            <SingleGauge score={scoreAfter} label="사후" />
-          </div>
+            </>
+          )}
         </div>
 
-        <RadarCard before={before} after={after} />
+        {loading || !evalData ? (
+          <div className="mb-5 rounded-[36px] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,245,244,0.94))] px-7 py-8 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
+            <p className="py-10 text-center text-[15px] font-bold text-stone-400 animate-pulse">계산중입니다...</p>
+          </div>
+        ) : (
+          <RadarCard before={before} after={after} />
+        )}
 
         <div className="mt-6 flex w-full justify-end rounded-[28px] border border-white/80 bg-white/80 px-5 py-3.5 backdrop-blur-md shadow-[0_16px_32px_rgba(0,0,0,0.08)]">
           <button

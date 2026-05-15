@@ -72,8 +72,16 @@ const SWING_PHASE_TO_STAGE = {
   free_rebuttal: 3, role_reversal: 4, synthesis: 5,
 };
 
+function Calculating() {
+  return (
+    <div className="flex items-center justify-center py-12 text-[15px] font-bold text-stone-400 animate-pulse">
+      계산중입니다...
+    </div>
+  );
+}
+
 function mapSwingTurns(swingTurns) {
-  if (!swingTurns?.length) return TIMELINE_TURNS_MOCK;
+  if (!swingTurns?.length) return [];
   return swingTurns.map((t, i) => {
     const isPro    = (t.side ?? '').toUpperCase() === 'PRO';
     const typeInfo = SWING_TYPE_MAP[t.type] ?? { label: '주요 턴', labelColor: 'blue' };
@@ -379,12 +387,15 @@ function mapToTriMetrics(phase) {
 export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, topicLabel = '토론 최종 평가' }) {
   const [evalData, setEvalData]     = useState(null);
   const [swingTurns, setSwingTurns] = useState(null);
+  const [evalLoading, setEvalLoading]   = useState(true);
+  const [swingLoading, setSwingLoading] = useState(true);
 
   useEffect(() => {
     try {
       const stored = JSON.parse(sessionStorage.getItem('capstone_evaluation'));
       if (stored) setEvalData(stored);
     } catch {}
+    setEvalLoading(false);
   }, []);
 
   useEffect(() => {
@@ -395,12 +406,13 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
         const session = JSON.parse(sessionStorage.getItem('capstone_debate_session'));
         sessionId = session?.sessionId;
       }
-      if (!sessionId) return;
+      if (!sessionId) { setSwingLoading(false); return; }
       fetch(`http://localhost:8080/api/debates/${sessionId}/final-report`)
         .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(data => setSwingTurns(data.swing_turns ?? []))
-        .catch(() => {});
-    } catch {}
+        .catch(() => {})
+        .finally(() => setSwingLoading(false));
+    } catch { setSwingLoading(false); }
   }, []);
 
   // 평가 데이터 → 표시 값 도출
@@ -498,19 +510,25 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
 
         {/* ── Row 1: 최종 승자 (full width) ── */}
         <div className={`rounded-[36px] border border-white/80 px-8 py-8 shadow-[0_24px_60px_rgba(0,0,0,0.10)] ${
-          finalIsPro
-            ? 'bg-[linear-gradient(145deg,rgba(219,234,254,0.9),rgba(255,255,255,0.96))]'
-            : 'bg-[linear-gradient(145deg,rgba(254,226,226,0.9),rgba(255,255,255,0.96))]'
+          evalLoading || !evalData
+            ? 'bg-white/80'
+            : finalIsPro
+              ? 'bg-[linear-gradient(145deg,rgba(219,234,254,0.9),rgba(255,255,255,0.96))]'
+              : 'bg-[linear-gradient(145deg,rgba(254,226,226,0.9),rgba(255,255,255,0.96))]'
         }`}>
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-[42px] font-black tracking-tight text-stone-900">
-              {finalIsPro ? '찬성 측 승리' : '반대 측 승리'}
-            </p>
-            <p className="text-[15px] font-semibold text-stone-500 text-center max-w-2xl leading-relaxed">
-              {winnerComment}
-            </p>
-          </div>
-          <ConflictBar proPct={finalProPct} conPct={finalConPct} />
+          {evalLoading || !evalData ? <Calculating /> : (
+            <>
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-[42px] font-black tracking-tight text-stone-900">
+                  {finalIsPro ? '찬성 측 승리' : '반대 측 승리'}
+                </p>
+                <p className="text-[15px] font-semibold text-stone-500 text-center max-w-2xl leading-relaxed">
+                  {winnerComment}
+                </p>
+              </div>
+              <ConflictBar proPct={finalProPct} conPct={finalConPct} />
+            </>
+          )}
         </div>
 
         {/* ── Row 2: 능력치 분석(2fr) + 타임라인(3fr) ── */}
@@ -520,70 +538,84 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
           <div className="rounded-[36px] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,245,244,0.94))] px-7 py-7 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
             <h3 className="mb-1 text-[20px] font-extrabold text-stone-800">능력치 및 데이터 분석</h3>
             <p className="mb-5 text-[14px] text-stone-400">전체 턴 평균 · 3개 지표 진영 비교</p>
-            <div className="flex flex-col items-center mb-5">
-              <TriangleRadar metrics={metricsData} size={220} />
-              <div className="mt-3 flex items-center gap-5 text-[13px] font-bold text-stone-600">
-                <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-blue-400"/>찬성</span>
-                <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-red-400"/>반대</span>
-              </div>
-            </div>
-            <div className="border-t border-stone-100 pt-4 space-y-2.5">
-              {metricsData.map(m => <MetricRow key={m.key} {...m} />)}
-            </div>
+            {evalLoading || !evalData ? <Calculating /> : (
+              <>
+                <div className="flex flex-col items-center mb-5">
+                  <TriangleRadar metrics={metricsData} size={220} />
+                  <div className="mt-3 flex items-center gap-5 text-[13px] font-bold text-stone-600">
+                    <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-blue-400"/>찬성</span>
+                    <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-red-400"/>반대</span>
+                  </div>
+                </div>
+                <div className="border-t border-stone-100 pt-4 space-y-2.5">
+                  {metricsData.map(m => <MetricRow key={m.key} {...m} />)}
+                </div>
+              </>
+            )}
           </div>
 
           {/* 핵심 전환 턴 타임라인 */}
           <div className="rounded-[36px] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,245,244,0.94))] px-7 py-7 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
             <h3 className="mb-1 text-[20px] font-extrabold text-stone-800">핵심 전환 턴 타임라인</h3>
             <p className="mb-6 text-[14px] text-stone-400">주요 발언 5개 · PRO ↔ CON 교차 시각화</p>
-            <AlternatingTimeline turns={mapSwingTurns(swingTurns)} />
+            {swingLoading ? <Calculating /> : <AlternatingTimeline turns={mapSwingTurns(swingTurns)} />}
           </div>
         </div>
 
         {/* ── Row 3: MVP (full width, 가로 바) ── */}
         <div className={`rounded-[36px] border border-white/80 px-8 py-6 shadow-[0_24px_60px_rgba(0,0,0,0.10)] ${
-          mvpSide === 'pro'
-            ? 'bg-[linear-gradient(145deg,rgba(219,234,254,0.7),rgba(255,255,255,0.96))]'
-            : 'bg-[linear-gradient(145deg,rgba(254,226,226,0.7),rgba(255,255,255,0.96))]'
+          evalLoading || !evalData
+            ? 'bg-white/80'
+            : mvpSide === 'pro'
+              ? 'bg-[linear-gradient(145deg,rgba(219,234,254,0.7),rgba(255,255,255,0.96))]'
+              : 'bg-[linear-gradient(145deg,rgba(254,226,226,0.7),rgba(255,255,255,0.96))]'
         }`}>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4 shrink-0">
-              <div className={`flex h-16 w-16 items-center justify-center rounded-full ${
-                mvpSide === 'pro' ? 'bg-blue-500' : 'bg-rose-500'
-              }`}>
-                <User size={30} className="text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[22px] font-black text-stone-900">{MVP.speaker}</span>
-                  <span className="flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-0.5 text-[12px] font-extrabold text-white">
-                    <Star size={11} className="fill-white" /> MVP
-                  </span>
+          {evalLoading || !evalData ? <Calculating /> : (
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4 shrink-0">
+                <div className={`flex h-16 w-16 items-center justify-center rounded-full ${
+                  mvpSide === 'pro' ? 'bg-blue-500' : 'bg-rose-500'
+                }`}>
+                  <User size={30} className="text-white" />
                 </div>
-                <p className="text-[13px] font-semibold text-stone-500">
-                  {evalData ? `3개 지표 평균 ${mvpScore}점` : MVP.reason}
-                </p>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[22px] font-black text-stone-900">{MVP.speaker}</span>
+                    <span className="flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-0.5 text-[12px] font-extrabold text-white">
+                      <Star size={11} className="fill-white" /> MVP
+                    </span>
+                  </div>
+                  <p className="text-[13px] font-semibold text-stone-500">
+                    3개 지표 평균 {mvpScore}점
+                  </p>
+                </div>
+              </div>
+              <div className="mx-2 h-12 w-px bg-stone-200 shrink-0" />
+              <div className="flex flex-1 items-center justify-around gap-4">
+                {feedbackMetrics.map(m => (
+                  <div key={m.key} className="flex flex-col items-center gap-1">
+                    <MIcon name={m.icon} size={20} fill={1} className="text-stone-400" />
+                    <span className="text-[13px] font-bold text-stone-600">{m.label}</span>
+                    <span className={`text-[28px] font-black ${SCORE_COLOR(m.score)}`}>{m.score}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="mx-2 h-12 w-px bg-stone-200 shrink-0" />
-            <div className="flex flex-1 items-center justify-around gap-4">
-              {feedbackMetrics.map(m => (
-                <div key={m.key} className="flex flex-col items-center gap-1">
-                  <MIcon name={m.icon} size={20} fill={1} className="text-stone-400" />
-                  <span className="text-[13px] font-bold text-stone-600">{m.label}</span>
-                  <span className={`text-[28px] font-black ${SCORE_COLOR(m.score)}`}>{m.score}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
 
         {/* ── Row 4: AI 코치 피드백 (3열) ── */}
         <div>
           <h3 className="mb-4 text-[20px] font-extrabold text-stone-800 px-1">AI 코치 피드백</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {feedbackMetrics.map(m => <FeedbackCard key={m.key} metric={m} />)}
-          </div>
+          {evalLoading || !evalData ? (
+            <div className="rounded-[36px] border border-white/80 bg-white/80 px-8 py-2">
+              <Calculating />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {feedbackMetrics.map(m => <FeedbackCard key={m.key} metric={m} />)}
+            </div>
+          )}
         </div>
 
         {/* 하단 버튼 */}
