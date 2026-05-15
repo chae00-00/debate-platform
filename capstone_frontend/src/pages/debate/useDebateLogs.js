@@ -457,7 +457,7 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
 
   // ── 사용자 발언 제출 (전 단계 공통): POST /api/debates/{sessionId}/submit ────
   const submitTurn = useCallback(
-    async (content, phase = 'opening', pendingAttack = null, isChained = false) => {
+    async (content, phase = 'opening', pendingAttack = null, isChained = false, targetId = null) => {
       const stage = PHASE_TO_STAGE[phase] ?? 1;
       const sid = sessionIdRef.current;
       const normalizedContent = (content ?? '').trim();
@@ -584,7 +584,7 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
-            body: JSON.stringify({ content: normalizedContent }),
+            body: JSON.stringify({ content: normalizedContent, targetId }),
           },
           ctrl.signal,
         )) {
@@ -620,7 +620,7 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
               freeRebuttalUserTurnCountRef.current <= 1
             ) {
               // 답변 제출 후 같은 단계가 유지될 때만 공격을 자동으로 별도 제출
-              await submitTurnRef.current(normalizedPendingAttack, 'free_rebuttal', null, true);
+              await submitTurnRef.current(normalizedPendingAttack, 'free_rebuttal', null, true, targetId);
             } else {
               // 백엔드가 다른 단계로 넘어갔다면 pendingAttack은 자동 폐기
               queueAwaitUserRef.current = true;

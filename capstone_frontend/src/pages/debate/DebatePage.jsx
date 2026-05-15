@@ -218,9 +218,9 @@ export default function DebatePage({
     : getSpeakerLabel();
 
   // 단계별 사용자 발언 제출 (stages 2~5)
-  const handleSubmitTurn = (content, pendingAttack = null) => {
+  const handleSubmitTurn = (content, pendingAttack = null, targetId = null) => {
     const phase = STAGE_TO_PHASE[currentStage] ?? 'opening';
-    submitTurn(content, phase, pendingAttack);
+    submitTurn(content, phase, pendingAttack, false, targetId);
     setMyTurnOverride(false);
   };
 

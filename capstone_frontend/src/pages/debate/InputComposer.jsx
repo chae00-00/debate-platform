@@ -145,9 +145,11 @@ export default function InputComposer({
     const attack = stage3Attack.trim();
     if (!answer && !attack) return;
 
+    const targetId = stage3Opponent?.id ?? null;
+
     if (!stage3CanAttack) {
       if (!answer) return;
-      onSubmitTurn(answer);
+      onSubmitTurn(answer, null, targetId);
       setStage3Answer('');
       setStage3Attack('');
       return;
@@ -155,9 +157,9 @@ export default function InputComposer({
 
     if (answer && attack) {
       // 답변 먼저 제출, 공격은 자동으로 이어서 제출 (말풍선 2개)
-      onSubmitTurn(answer, attack);
+      onSubmitTurn(answer, attack, targetId);
     } else {
-      onSubmitTurn(answer || attack);
+      onSubmitTurn(answer || attack, null, targetId);
     }
     setStage3Answer('');
     setStage3Attack('');
