@@ -52,10 +52,11 @@ const BrandLogos = () => (
 
 const Login = ({ onLogin, onSkip }) => {
   const handleSocialLogin = (providerId) => {
+    const baseUrl = import.meta.env.VITE_API_URL || '';
     const oauthUrls = {
-      kakao: 'http://localhost:8080/oauth2/authorization/kakao',
-      naver: 'http://localhost:8080/oauth2/authorization/naver',
-      google: 'http://localhost:8080/oauth2/authorization/google',
+      kakao: `${baseUrl}/oauth2/authorization/kakao`,
+      naver: `${baseUrl}/oauth2/authorization/naver`,
+      google: `${baseUrl}/oauth2/authorization/google`,
     };
     window.location.href = oauthUrls[providerId];
   };

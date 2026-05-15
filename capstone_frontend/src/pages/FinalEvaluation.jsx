@@ -407,7 +407,8 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
         sessionId = session?.sessionId;
       }
       if (!sessionId) { setSwingLoading(false); return; }
-      fetch(`http://localhost:8080/api/debates/${sessionId}/final-report`)
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      fetch(`${baseUrl}/api/debates/${sessionId}/final-report`)
         .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(data => setSwingTurns(data.swing_turns ?? []))
         .catch(() => {})
