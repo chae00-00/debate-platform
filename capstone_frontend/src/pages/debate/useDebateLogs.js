@@ -274,8 +274,8 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
       if (!next.moderator && next._analysis) {
         setLiveAnalysis({ ...next._analysis, resolvedSpeaker: next.speaker ?? null });
       }
+      setIsTyping(null); // 스트리밍 시작 전에 타이핑 인디케이터 숨김
       streamAgentLog(next).then(() => {
-        setIsTyping(null);
         timerRef.current = setTimeout(() => playNextRef.current?.(), 350);
       });
     }, delay);
@@ -602,7 +602,7 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
             headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
             body: JSON.stringify({
             content: normalizedContent,
-            ...(opponentId && !isChained ? { target_id: opponentId } : {}),
+            ...(opponentId && !isChained ? { targetId: opponentId } : {}),
           }),
           },
           ctrl.signal,
