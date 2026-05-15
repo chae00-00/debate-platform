@@ -8,4 +8,5 @@ import lombok.NoArgsConstructor;
 public class SubmitRequest {
 
     private String content;
+    private String targetId;
 }

@@ -24,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.Disposable;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -34,6 +35,7 @@ import java.util.concurrent.*;
 public class DebateService {
 
     private static final String TEST_USER_SOCIAL_ID = "test-user-001";
+    private static final int PREPARE_SESSION_TIMEOUT_SECONDS = 45;
 
     private final RestTemplate restTemplate;
     private final WebClient webClient;
@@ -128,12 +130,12 @@ public class DebateService {
                 );
 
         try {
-            String fastApiSessionId = sessionIdFuture.get(15, TimeUnit.SECONDS);
+            String fastApiSessionId = sessionIdFuture.get(PREPARE_SESSION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             bufferMap.put(fastApiSessionId, session);
             log.info("[prepare] 세션 준비 완료: {}", fastApiSessionId);
             return new PrepareResponse(fastApiSessionId);
         } catch (TimeoutException e) {
-            throw new RuntimeException("FastAPI 세션 초기화 타임아웃 (15s)");
+            throw new RuntimeException("FastAPI 세션 초기화 타임아웃 (" + PREPARE_SESSION_TIMEOUT_SECONDS + "s)");
         } catch (Exception e) {
             throw new RuntimeException("FastAPI 세션 초기화 실패: " + e.getMessage());
         }
@@ -443,7 +445,11 @@ public class DebateService {
         // 사용자 발언 저장
         saveUserUtterance(sessionId, request.getContent());
 
-        Map<String, String> body = Map.of("content", request.getContent());
+        Map<String, Object> body = new HashMap<>();
+        body.put("content", request.getContent());
+        if (request.getTargetId() != null) {
+            body.put("target_id", request.getTargetId());
+        }
 
         Disposable disposable = webClient.post()
                 .uri("/debate/" + sessionId + "/submit")
@@ -622,21 +628,13 @@ public class DebateService {
 
     private User getOrCreateTestUser() {
         return userRepository.findBySocialIdAndProvider(TEST_USER_SOCIAL_ID, Provider.GOOGLE)
-                .orElseGet(() -> {
-                    try {
-                        return userRepository.save(
-                                User.builder()
-                                        .socialId(TEST_USER_SOCIAL_ID)
-                                        .provider(Provider.GOOGLE)
-                                        .email("test@test.com")
-                                        .nickname("테스트유저")
-                                        .build()
-                        );
-                    } catch (Exception e) {
-                        // 동시 요청으로 중복 생성 시 다시 조회
-                        return userRepository.findBySocialIdAndProvider(TEST_USER_SOCIAL_ID, Provider.GOOGLE)
-                                .orElseThrow(() -> new RuntimeException("테스트 유저 생성 실패"));
-                    }
-                });
+                .orElseGet(() -> userRepository.save(
+                        User.builder()
+                                .socialId(TEST_USER_SOCIAL_ID)
+                                .provider(Provider.GOOGLE)
+                                .email("test@test.com")
+                                .nickname("테스트유저")
+                                .build()
+                ));
     }
 }
