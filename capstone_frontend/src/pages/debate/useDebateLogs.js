@@ -114,7 +114,6 @@ function buildLogFromSSE(raw, resolveLabel) {
     id: raw.turn ?? `entry-${Date.now()}`,
     stage: PHASE_TO_STAGE[phase] ?? 1,
     side: stance,
-    speakerId,                            // raw agent_id (예: "agent_1", "agent_2")
     speaker: resolveLabel(speakerId, stance),
     type: PHASE_TO_TYPE[phase] ?? '발언',
     turnNumber: raw.turn,
@@ -158,7 +157,6 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
 
   const queueRef = useRef([]);
   const isPlayingRef = useRef(false);
-  const pausedRef = useRef(false);
   const queueAwaitUserRef = useRef(false);
   const queueOnCompleteRef = useRef(null);
   const timerRef = useRef(null);
@@ -234,11 +232,6 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
   // ── 큐 재생 ─────────────────────────────────────────────────────────────────
   const playNextRef = useRef(null);
   playNextRef.current = () => {
-    if (pausedRef.current) {
-      isPlayingRef.current = false;
-      return;
-    }
-
     if (queueRef.current.length === 0) {
       isPlayingRef.current = false;
       setIsTyping(null);
@@ -250,12 +243,10 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
     }
 
     isPlayingRef.current = true;
-    const next = queueRef.current[0]; // shift는 setTimeout 안에서 수행
+    const next = queueRef.current.shift();
 
     if (next.moderator) {
       timerRef.current = setTimeout(() => {
-        if (pausedRef.current) { isPlayingRef.current = false; return; }
-        queueRef.current.shift();
         setVisibleLogs((prev) => [...prev, next]);
         timerRef.current = setTimeout(() => playNextRef.current?.(), 450);
       }, 300);
@@ -265,17 +256,11 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
     setIsTyping(next.speaker ?? '...');
     const delay = next.skipDelay ? 500 : getRenderDelay(next.text ?? '', agentCount === 1);
     timerRef.current = setTimeout(() => {
-      if (pausedRef.current) {
-        setIsTyping(null);
-        isPlayingRef.current = false;
-        return;
-      }
-      queueRef.current.shift();
+      setIsTyping(null);
       if (!next.moderator && next._analysis) {
         setLiveAnalysis({ ...next._analysis, resolvedSpeaker: next.speaker ?? null });
       }
       streamAgentLog(next).then(() => {
-        setIsTyping(null);
         timerRef.current = setTimeout(() => playNextRef.current?.(), 350);
       });
     }, delay);
@@ -296,7 +281,6 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
     abortRef.current?.abort();
     queueRef.current = [];
     isPlayingRef.current = false;
-    pausedRef.current = false;
     queueAwaitUserRef.current = false;
     queueOnCompleteRef.current = null;
     setVisibleLogs([]);
@@ -473,7 +457,7 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
 
   // ── 사용자 발언 제출 (전 단계 공통): POST /api/debates/{sessionId}/submit ────
   const submitTurn = useCallback(
-    async (content, phase = 'opening', pendingAttack = null, isChained = false, opponentId = null) => {
+    async (content, phase = 'opening', pendingAttack = null, isChained = false) => {
       const stage = PHASE_TO_STAGE[phase] ?? 1;
       const sid = sessionIdRef.current;
       const normalizedContent = (content ?? '').trim();
@@ -600,10 +584,7 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
-            body: JSON.stringify({
-            content: normalizedContent,
-            ...(opponentId && !isChained ? { target_id: opponentId } : {}),
-          }),
+            body: JSON.stringify({ content: normalizedContent }),
           },
           ctrl.signal,
         )) {
@@ -666,20 +647,6 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
     [submitTurn],
   );
 
-  const pauseQueue = useCallback(() => {
-    pausedRef.current = true;
-    clearTimer();
-    setIsTyping(null);
-    isPlayingRef.current = false;
-  }, [clearTimer]);
-
-  const resumeQueue = useCallback(() => {
-    pausedRef.current = false;
-    if (!isPlayingRef.current && queueRef.current.length > 0) {
-      playNextRef.current?.();
-    }
-  }, []);
-
   return {
     logs: visibleLogs,
     isTyping,
@@ -696,7 +663,5 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
     liveAnalysis,
     submitOpening,
     submitTurn,
-    pauseQueue,
-    resumeQueue,
   };
 }
