@@ -15,3 +15,8 @@ export const prepareDebate = (debateParams) =>
 
 export const getDebateState = (sessionId) =>
   apiFetch(`/api/debates/${sessionId}/state`);
+
+export const getAssistantGuide = (sessionId, phase, opponentId = null) => {
+  const params = opponentId ? `?opponentId=${encodeURIComponent(opponentId)}` : '';
+  return apiFetch(`/api/debate/${sessionId}/assistant/${phase}${params}`);
+};
