@@ -111,6 +111,7 @@ export default function ChatPanel({
   const fetchedRef = useRef(new Set());
 
   useEffect(() => {
+    console.log('[ChatPanel] sessionId:', sessionId, 'currentStage:', currentStage);
     if (!sessionId) return;
     const phase = STAGE_TO_PHASE[currentStage];
     if (!phase) return;
