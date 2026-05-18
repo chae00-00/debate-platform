@@ -27,6 +27,7 @@ export default function AssistantPanel({ sessionId, currentStage, stage3Opponent
   const fetchKey = `${sessionId}-${phase}-${opponentId ?? ''}`;
 
   useEffect(() => {
+    console.log('[AssistantPanel] sessionId:', sessionId, 'phase:', phase);
     if (!sessionId || !phase) return;
     if (prevKey.current === fetchKey) return;
     prevKey.current = fetchKey;
@@ -35,7 +36,10 @@ export default function AssistantPanel({ sessionId, currentStage, stage3Opponent
     setText('');
     getAssistantGuide(sessionId, phase, opponentId)
       .then((res) => setText(res.text ?? ''))
-      .catch(() => setText(''))
+      .catch((err) => {
+        console.error('[AssistantPanel] 안내문 요청 실패:', err);
+        setText('');
+      })
       .finally(() => setLoading(false));
   }, [fetchKey, sessionId, phase, opponentId]);
 
