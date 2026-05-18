@@ -62,17 +62,17 @@ function TypingIndicator({ speaker, currentStage }) {
       <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${tone}`}>
         {shortLabel}
       </div>
-      <div className="flex items-center gap-2 rounded-[18px] rounded-bl-sm border border-stone-700 bg-stone-800 px-4 py-3 shadow-sm">
-        <span className="text-[12px] font-semibold text-stone-300">{label}</span>
+      <div className="flex items-center gap-2 rounded-[18px] rounded-bl-sm border border-stone-100 bg-white/90 px-4 py-3 shadow-sm">
+        <span className="text-[12px] font-semibold text-stone-400">{label}</span>
         {isRoleReversal && (
-          <span className="rounded-full bg-amber-900/60 px-2 py-0.5 text-[10px] font-extrabold text-amber-300">
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-extrabold text-amber-700">
             역할반전 중
           </span>
         )}
         <span className="flex gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-stone-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-          <span className="h-1.5 w-1.5 rounded-full bg-stone-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-          <span className="h-1.5 w-1.5 rounded-full bg-stone-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+          <span className="h-1.5 w-1.5 rounded-full bg-stone-300 animate-bounce" style={{ animationDelay: '0ms' }} />
+          <span className="h-1.5 w-1.5 rounded-full bg-stone-300 animate-bounce" style={{ animationDelay: '150ms' }} />
+          <span className="h-1.5 w-1.5 rounded-full bg-stone-300 animate-bounce" style={{ animationDelay: '300ms' }} />
         </span>
       </div>
     </div>
@@ -129,7 +129,7 @@ export default function ChatPanel({
   }, [logs, currentStage, isTyping]);
 
   return (
-    <section className="rounded-[32px] border border-stone-200 bg-stone-950 flex flex-col h-full overflow-hidden shadow-[0_12px_32px_rgba(0,0,0,0.15)]">
+    <section className="rounded-[32px] border border-white/80 bg-white/60 backdrop-blur-md shadow-[0_12px_32px_rgba(0,0,0,0.04)] flex flex-col h-full overflow-hidden">
       {/* 스크롤 영역 */}
       <div
         ref={scrollRef}
@@ -151,11 +151,11 @@ export default function ChatPanel({
               <div key={log.id} id={isFirstOfStage ? `stage-anchor-${log.stage}` : undefined}>
                 {isFirstOfStage && log.stage > 1 && (
                   <div className="flex items-center gap-3 my-3">
-                    <div className="flex-1 h-[1px] bg-stone-700" />
-                    <span className="shrink-0 rounded-full border border-stone-600 bg-stone-800 px-3 py-1 text-[12px] font-extrabold text-stone-300 tracking-wide">
+                    <div className="flex-1 h-[2px] bg-stone-300" />
+                    <span className="shrink-0 rounded-full border border-stone-300 bg-stone-100 px-3 py-1 text-[12px] font-extrabold text-stone-500 tracking-wide">
                       {STAGE_LABELS[log.stage] ?? `${log.stage}단계`}
                     </span>
-                    <div className="flex-1 h-[1px] bg-stone-700" />
+                    <div className="flex-1 h-[2px] bg-stone-300" />
                   </div>
                 )}
                 <SpeechBubble log={log} />
@@ -177,9 +177,9 @@ export default function ChatPanel({
           <div className={`rounded-[28px] p-2 transition-all duration-300 border shadow-sm ${
             isMyTurn
               ? isProSide
-                ? 'border-blue-300/60 bg-blue-950/40 shadow-[0_4px_20px_rgba(59,130,246,0.12)]'
-                : 'border-rose-300/60 bg-rose-950/40 shadow-[0_4px_20px_rgba(225,29,72,0.12)]'
-              : 'border-stone-700 bg-stone-900'
+                ? 'border-blue-200 bg-blue-50/40 shadow-[0_4px_20px_rgba(59,130,246,0.08)]'
+                : 'border-rose-200 bg-rose-50/40 shadow-[0_4px_20px_rgba(225,29,72,0.08)]'
+              : 'border-transparent bg-white/90'
           }`}>
             <InputComposer
               isMyTurn={isMyTurn}
