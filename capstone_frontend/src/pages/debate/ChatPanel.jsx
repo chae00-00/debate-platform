@@ -108,24 +108,27 @@ export default function ChatPanel({
   const scrollRef = useRef(null);
   const [assistantTexts, setAssistantTexts] = useState({});
   const [assistantLoading, setAssistantLoading] = useState({});
-  const fetchedRef = useRef(new Set());
+  const prevFetchKey = useRef('');
+
+  const phase = STAGE_TO_PHASE[currentStage];
+  const opponentId = currentStage === 3 ? (stage3Opponent?.id ?? null) : null;
+  const fetchKey = `${sessionId ?? ''}-${phase ?? ''}-${opponentId ?? ''}`;
 
   useEffect(() => {
-    console.log('[ChatPanel] sessionId:', sessionId, 'currentStage:', currentStage);
-    if (!sessionId) return;
-    const phase = STAGE_TO_PHASE[currentStage];
-    if (!phase) return;
-    const key = `${sessionId}-${phase}-${currentStage === 3 ? (stage3Opponent?.id ?? '') : ''}`;
-    if (fetchedRef.current.has(key)) return;
-    fetchedRef.current.add(key);
+    console.log('[ChatPanel] fetchKey:', fetchKey, 'sessionId:', sessionId, 'stage:', currentStage);
+    if (!sessionId || !phase) return;
+    if (prevFetchKey.current === fetchKey) return;
+    prevFetchKey.current = fetchKey;
 
-    const opponentId = currentStage === 3 ? (stage3Opponent?.id ?? null) : null;
     setAssistantLoading((prev) => ({ ...prev, [currentStage]: true }));
     getAssistantGuide(sessionId, phase, opponentId)
-      .then((res) => setAssistantTexts((prev) => ({ ...prev, [currentStage]: res.text ?? '' })))
-      .catch(() => {})
+      .then((res) => {
+        console.log('[ChatPanel] assistant response:', res);
+        setAssistantTexts((prev) => ({ ...prev, [currentStage]: res.text ?? '' }));
+      })
+      .catch((err) => console.error('[ChatPanel] assistant error:', err))
       .finally(() => setAssistantLoading((prev) => ({ ...prev, [currentStage]: false })));
-  }, [sessionId, currentStage, stage3Opponent]);
+  }, [fetchKey, sessionId, phase, opponentId, currentStage]);
 
   useEffect(() => {
     if (scrollRef.current) {
