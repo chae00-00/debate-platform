@@ -1,6 +1,40 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SpeechBubble from './SpeechBubble';
 import InputComposer from './InputComposer';
+import { getAssistantGuide } from '../../api/debatesApi';
+
+const STAGE_TO_PHASE = {
+  1: 'opening',
+  2: 'chained_rebuttal',
+  3: 'free_rebuttal',
+  4: 'role_reversal',
+  5: 'synthesis',
+};
+
+function AssistantCard({ text, loading }) {
+  if (!loading && !text) return null;
+  return (
+    <div className="flex justify-center py-2">
+      <div className="flex items-start gap-3 rounded-2xl border border-stone-200 bg-stone-50/80 px-4 py-3 max-w-[85%] shadow-sm">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-900 text-white text-[12px] font-black select-none mt-0.5">
+          V
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-[11px] font-extrabold text-stone-400 tracking-wide">비비드</span>
+          {loading ? (
+            <div className="flex flex-col gap-1.5 w-48">
+              <div className="h-2 w-full rounded-full bg-stone-200 animate-pulse" />
+              <div className="h-2 w-4/5 rounded-full bg-stone-200 animate-pulse" />
+              <div className="h-2 w-3/5 rounded-full bg-stone-200 animate-pulse" />
+            </div>
+          ) : (
+            <p className="text-[13px] leading-relaxed text-stone-700 whitespace-pre-wrap">{text}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // 타이핑 인디케이터 — 다음 발화자가 준비 중임을 보여준다
 function TypingIndicator({ speaker, currentStage }) {
@@ -69,8 +103,28 @@ export default function ChatPanel({
   openingComplete,
   onSubmitTurn,
   stage3Opponent,
+  sessionId,
 }) {
   const scrollRef = useRef(null);
+  const [assistantTexts, setAssistantTexts] = useState({});
+  const [assistantLoading, setAssistantLoading] = useState({});
+  const fetchedRef = useRef(new Set());
+
+  useEffect(() => {
+    if (!sessionId) return;
+    const phase = STAGE_TO_PHASE[currentStage];
+    if (!phase) return;
+    const key = `${sessionId}-${phase}-${currentStage === 3 ? (stage3Opponent?.id ?? '') : ''}`;
+    if (fetchedRef.current.has(key)) return;
+    fetchedRef.current.add(key);
+
+    const opponentId = currentStage === 3 ? (stage3Opponent?.id ?? null) : null;
+    setAssistantLoading((prev) => ({ ...prev, [currentStage]: true }));
+    getAssistantGuide(sessionId, phase, opponentId)
+      .then((res) => setAssistantTexts((prev) => ({ ...prev, [currentStage]: res.text ?? '' })))
+      .catch(() => {})
+      .finally(() => setAssistantLoading((prev) => ({ ...prev, [currentStage]: false })));
+  }, [sessionId, currentStage, stage3Opponent]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -85,6 +139,10 @@ export default function ChatPanel({
         ref={scrollRef}
         className="hide-scrollbar flex-1 overflow-y-auto p-4 space-y-4"
       >
+        <AssistantCard
+          text={assistantTexts[1]}
+          loading={assistantLoading[1]}
+        />
         {(() => {
           const STAGE_LABELS = {
             1: '1단계 — 입론',
@@ -100,13 +158,19 @@ export default function ChatPanel({
             return (
               <div key={log.id} id={isFirstOfStage ? `stage-anchor-${log.stage}` : undefined}>
                 {isFirstOfStage && log.stage > 1 && (
-                  <div className="flex items-center gap-3 my-3">
-                    <div className="flex-1 h-[2px] bg-stone-300" />
-                    <span className="shrink-0 rounded-full border border-stone-300 bg-stone-100 px-3 py-1 text-[12px] font-extrabold text-stone-500 tracking-wide">
-                      {STAGE_LABELS[log.stage] ?? `${log.stage}단계`}
-                    </span>
-                    <div className="flex-1 h-[2px] bg-stone-300" />
-                  </div>
+                  <>
+                    <div className="flex items-center gap-3 my-3">
+                      <div className="flex-1 h-[2px] bg-stone-300" />
+                      <span className="shrink-0 rounded-full border border-stone-300 bg-stone-100 px-3 py-1 text-[12px] font-extrabold text-stone-500 tracking-wide">
+                        {STAGE_LABELS[log.stage] ?? `${log.stage}단계`}
+                      </span>
+                      <div className="flex-1 h-[2px] bg-stone-300" />
+                    </div>
+                    <AssistantCard
+                      text={assistantTexts[log.stage]}
+                      loading={assistantLoading[log.stage]}
+                    />
+                  </>
                 )}
                 <SpeechBubble log={log} />
               </div>

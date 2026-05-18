@@ -9,7 +9,6 @@ function clearDebateStorage() {
 import ChatPanel from './ChatPanel';
 import StepperPanel from './StepperPanel';
 import AnalysisPanel from './AnalysisPanel';
-import AssistantPanel from './AssistantPanel';
 import ConflictBarPanel from './ConflictBarPanel';
 import Stage3OpponentModal from './Stage3OpponentModal';
 import { useDebateLogs } from './useDebateLogs';
@@ -406,6 +405,7 @@ export default function DebatePage({
               openingComplete={openingComplete}
               onSubmitTurn={handleSubmitTurn}
               stage3Opponent={stage3Opponent}
+              sessionId={sessionId}
             />
           </div>
 
@@ -428,11 +428,6 @@ export default function DebatePage({
               showLiveAnalysis={showLiveAnalysis}
               analysis={analysis}
               speakerLabel={speakerLabel}
-            />
-            <AssistantPanel
-              sessionId={sessionId}
-              currentStage={currentStage}
-              stage3Opponent={stage3Opponent}
             />
             <ConflictBarPanel
               currentStage={currentStage}
