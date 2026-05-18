@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import SpeechBubble from './SpeechBubble';
 import InputComposer from './InputComposer';
 import { getAssistantGuide } from '../../api/debatesApi';
+import { renderMarkdown } from './markdownRenderer';
 
 const STAGE_TO_PHASE = {
   1: 'opening',
@@ -14,14 +15,16 @@ const STAGE_TO_PHASE = {
 function AssistantCard({ text }) {
   if (!text) return null;
   return (
-    <div className="flex justify-center py-2 px-1">
-      <div className="flex items-start gap-3 rounded-2xl border border-stone-600 bg-stone-900 px-4 py-3 w-full shadow-md">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-stone-900 text-[12px] font-black select-none mt-0.5">
+    <div className="flex w-full justify-start">
+      <div className="flex items-start gap-2 max-w-[88%]">
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-stone-900 border border-stone-600 text-white text-[12px] font-black select-none">
           V
         </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-[11px] font-extrabold text-stone-400 tracking-wide">비비드</span>
-          <p className="text-[13px] leading-relaxed text-stone-100 whitespace-pre-wrap">{text}</p>
+        <div className="flex flex-col items-start gap-1">
+          <span className="text-[11px] font-extrabold text-stone-400 tracking-wide px-1">비비드</span>
+          <div className="rounded-[20px] rounded-tl-[6px] border border-stone-600 bg-stone-900 px-4 py-3 shadow-md text-[14px] leading-relaxed">
+            {renderMarkdown(text, true)}
+          </div>
         </div>
       </div>
     </div>
@@ -154,11 +157,22 @@ export default function ChatPanel({
             5: '5단계 — 종합 및 판정',
           };
           const seenStages = new Set();
+          const insertedBividStages = new Set();
+
           return logs.map((log) => {
             const isFirstOfStage = typeof log.stage === 'number' && !seenStages.has(log.stage);
             if (isFirstOfStage) seenStages.add(log.stage);
+
+            // 유저 첫 메시지 직전에 해당 스테이지 비비드 삽입 (1회)
+            let bividBefore = null;
+            if (log.isUser && !insertedBividStages.has(log.stage)
+                && revealedStages.has(log.stage) && assistantTexts[log.stage]) {
+              bividBefore = <AssistantCard key={`bivid-${log.stage}`} text={assistantTexts[log.stage]} />;
+              insertedBividStages.add(log.stage);
+            }
+
             return (
-              <div key={log.id} id={isFirstOfStage ? `stage-anchor-${log.stage}` : undefined}>
+              <Fragment key={log.id}>
                 {isFirstOfStage && log.stage > 1 && (
                   <div className="flex items-center gap-3 my-3">
                     <div className="flex-1 h-[2px] bg-stone-300" />
@@ -168,17 +182,24 @@ export default function ChatPanel({
                     <div className="flex-1 h-[2px] bg-stone-300" />
                   </div>
                 )}
-                <SpeechBubble log={log} />
-              </div>
+                {bividBefore}
+                <div id={isFirstOfStage ? `stage-anchor-${log.stage}` : undefined}>
+                  <SpeechBubble log={log} />
+                </div>
+              </Fragment>
             );
           });
         })()}
         {/* 타이핑 인디케이터: 토론 종료 후 / 최적해 모달 중 / 5단계 이후 유저 제출 뒤엔 숨김 */}
         {isTyping && !debateComplete && !isFinalize && !(currentStage >= 5 && !isMyTurn) && <TypingIndicator speaker={isTyping} currentStage={currentStage} />}
-        {/* 비비드: isMyTurn 시점에 reveal, 이후 유저 제출해도 스크롤 안에 유지 */}
-        {revealedStages.has(currentStage) && assistantTexts[currentStage] && (
-          <AssistantCard text={assistantTexts[currentStage]} />
-        )}
+        {/* 비비드: 유저가 아직 해당 스테이지 메시지를 안 보냈을 때만 맨 아래 표시 */}
+        {revealedStages.size > 0 && (() => {
+          const latestStage = Math.max(...revealedStages);
+          const userAlreadySent = logs.some(l => l.isUser && l.stage === latestStage);
+          return !userAlreadySent && assistantTexts[latestStage]
+            ? <AssistantCard text={assistantTexts[latestStage]} />
+            : null;
+        })()}
       </div>
 
       {/* 입력 영역: 토론 종료 후 숨김 */}
