@@ -9,7 +9,6 @@ function clearDebateStorage() {
 import ChatPanel from './ChatPanel';
 import StepperPanel from './StepperPanel';
 import AnalysisPanel from './AnalysisPanel';
-import AssistantPanel from './AssistantPanel';
 import ConflictBarPanel from './ConflictBarPanel';
 import Stage3OpponentModal from './Stage3OpponentModal';
 import { useDebateLogs } from './useDebateLogs';
@@ -70,7 +69,6 @@ export default function DebatePage({
     submitTurn,
     pauseQueue,
     resumeQueue,
-    sessionId,
   } = useDebateLogs(debateParams, agentCount, userStance, preparedSessionId);
 
   // logs에서 실시간으로 진행 상황 파악 (useDebateLogs 이후에 선언)
@@ -428,11 +426,6 @@ export default function DebatePage({
               showLiveAnalysis={showLiveAnalysis}
               analysis={analysis}
               speakerLabel={speakerLabel}
-            />
-            <AssistantPanel
-              sessionId={sessionId}
-              currentStage={currentStage}
-              stage3Opponent={stage3Opponent}
             />
             <ConflictBarPanel
               currentStage={currentStage}
