@@ -41,6 +41,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(body);
     }
 
+    @ExceptionHandler(InvalidPhaseException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPhaseException(
+            InvalidPhaseException e,
+            HttpServletRequest request
+    ) {
+        ApiErrorResponse body = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage(),
+                request.getRequestURI(),
+                Instant.now()
+        );
+        return ResponseEntity.badRequest().body(body);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiErrorResponse> handleRuntimeException(
             RuntimeException e,
