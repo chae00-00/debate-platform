@@ -6,11 +6,11 @@ export default function SpeechBubble({ log }) {
     return (
       <div className="flex flex-col items-center gap-1 py-0.5">
         <div className="flex items-center gap-3 w-full">
-          <div className="flex-1 h-px bg-stone-200/60" />
-          <span className="text-[12px] font-bold text-stone-500 shrink-0">사회자</span>
-          <div className="flex-1 h-px bg-stone-200/60" />
+          <div className="flex-1 h-px bg-stone-600/60" />
+          <span className="text-[12px] font-bold text-stone-400 shrink-0">사회자</span>
+          <div className="flex-1 h-px bg-stone-600/60" />
         </div>
-        <p className="text-[14px] font-medium text-stone-600 leading-relaxed text-center max-w-[92%] px-2 py-1">
+        <p className="text-[14px] font-medium text-stone-300 leading-relaxed text-center max-w-[92%] px-2 py-1">
           {log.text}
         </p>
       </div>

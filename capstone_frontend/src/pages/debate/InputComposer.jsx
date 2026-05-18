@@ -288,11 +288,11 @@ export default function InputComposer({
   // ── 대기 중 화면 ──────────────────────────────────────────────────────────
   if (!isMyTurn) {
     return (
-      <div className="flex items-center justify-center h-[56px] text-[13px] font-bold text-stone-400 gap-2">
+      <div className="flex items-center justify-center h-[56px] text-[13px] font-bold text-stone-500 gap-2">
         <span className="flex gap-1.5">
-          <span className="w-1.5 h-1.5 bg-stone-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-          <span className="w-1.5 h-1.5 bg-stone-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-          <span className="w-1.5 h-1.5 bg-stone-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <span className="w-1.5 h-1.5 bg-stone-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+          <span className="w-1.5 h-1.5 bg-stone-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+          <span className="w-1.5 h-1.5 bg-stone-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
         </span>
         상대방 발언 대기 중
       </div>

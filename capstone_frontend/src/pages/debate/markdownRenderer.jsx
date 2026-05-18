@@ -1,25 +1,45 @@
 import React from 'react';
 
 export function renderInlineBold(line, isMine, key) {
-  const parts = line.split(/(\*\*[^*]+\*\*)/g);
   return (
     <p key={key} className={`leading-relaxed tracking-tight ${isMine ? 'text-stone-100' : 'text-stone-800'}`}>
-      {parts.map((part, j) =>
-        part.startsWith('**') && part.endsWith('**')
-          ? <strong key={j} className={isMine ? 'font-extrabold text-white' : 'font-extrabold text-stone-950'}>{part.slice(2, -2)}</strong>
-          : part
-      )}
+      {renderInlineNodes(line, isMine)}
     </p>
   );
 }
 
 function renderInlineNodes(line, isMine) {
-  const parts = line.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, j) =>
-    part.startsWith('**') && part.endsWith('**')
-      ? <strong key={j} className={isMine ? 'font-extrabold text-white' : 'font-extrabold text-stone-950'}>{part.slice(2, -2)}</strong>
-      : <React.Fragment key={j}>{part}</React.Fragment>
-  );
+  // 인식 순서: 마크다운 링크 → 볼드 → plain URL
+  const tokenRegex = /(\[([^\]]+)\]\((https?:\/\/[^)]+)\)|\*\*[^*]+\*\*|https?:\/\/[^\s,)>\]]+)/g;
+  const parts = [];
+  let last = 0;
+  let m;
+  while ((m = tokenRegex.exec(line)) !== null) {
+    if (m.index > last) parts.push({ type: 'text', value: line.slice(last, m.index) });
+    const token = m[0];
+    if (token.startsWith('[')) {
+      // [텍스트](URL)
+      parts.push({ type: 'link', label: m[2], href: m[3] });
+    } else if (token.startsWith('**')) {
+      parts.push({ type: 'bold', value: token.slice(2, -2) });
+    } else {
+      // plain URL
+      parts.push({ type: 'link', label: token, href: token });
+    }
+    last = m.index + token.length;
+  }
+  if (last < line.length) parts.push({ type: 'text', value: line.slice(last) });
+
+  return parts.map((p, j) => {
+    if (p.type === 'bold') return <strong key={j} className={isMine ? 'font-extrabold text-white' : 'font-extrabold text-stone-950'}>{p.value}</strong>;
+    if (p.type === 'link') return (
+      <a key={j} href={p.href} target="_blank" rel="noopener noreferrer"
+        className={`underline underline-offset-2 break-all ${isMine ? 'text-blue-200 hover:text-white' : 'text-blue-600 hover:text-blue-800'}`}>
+        {p.label}
+      </a>
+    );
+    return <React.Fragment key={j}>{p.value}</React.Fragment>;
+  });
 }
 
 export function renderMarkdown(text, isMine) {
