@@ -38,9 +38,7 @@ const AiSliderItem = ({ side, index, val, onChange }) => {
       {/* One UI 볼륨바 */}
       <div
         ref={trackRef}
-        onClick={handleClick}
-        onMouseMove={handleDrag}
-        className="relative w-10 rounded-3xl cursor-pointer overflow-visible"
+        className="relative w-10 rounded-3xl cursor-default overflow-visible pointer-events-none"
         style={{ height: TRACK_HEIGHT, background: 'rgba(0,0,0,0.07)' }}
       >
         {/* 채워지는 부분 */}

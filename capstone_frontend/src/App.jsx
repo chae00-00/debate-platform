@@ -39,7 +39,7 @@ const App = () => {
   const [stage, setStage] = useState(0); // 0: 세부주제, 1: 참여설정, 2: 사전설문, 3: 사전퀴즈, 4: 토론
   const [userStance, setUserStance] = useState(null);
   const [agentCount, setAgentCount] = useState(1);
-  const [aiStances, setAiStances] = useState({ pro: [5, 3, 1], con: [5, 3, 1] });
+  const [aiStances, setAiStances] = useState({ pro: [3, 3, 3], con: [3, 3, 3] });
   const [topics, setTopics] = useState(TOPICS); // 기본값: 하드코딩 데이터 (API 실패 시 fallback)
   const [debateParams, setDebateParams] = useState(null);
   const [preparedSessionId, setPreparedSessionId] = useState(null);
@@ -97,7 +97,7 @@ const App = () => {
     setStage(0);
     setUserStance(null);
     setAgentCount(1);
-    setAiStances({ pro: [5, 3, 1], con: [5, 3, 1] });
+    setAiStances({ pro: [3, 3, 3], con: [3, 3, 3] });
     setDebateParams(null);
     setPreparedSessionId(null);
     try { sessionStorage.removeItem('capstone_prepared_session'); } catch {}
