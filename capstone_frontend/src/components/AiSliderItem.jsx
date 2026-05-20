@@ -9,8 +9,9 @@ const AiSliderItem = ({ side, index, val, onChange }) => {
   const isPro = side === 'pro';
   const trackRef = useRef(null);
   const fillColor = isPro ? '#77A8F2' : '#FF737D';
+  const fixedVal = 3;
   const indicatorBottom =
-    ((val - 1) / 4) * MAX_INDICATOR_BOTTOM;
+    ((fixedVal - 1) / 4) * MAX_INDICATOR_BOTTOM;
   const fillHeight = indicatorBottom + INDICATOR_HEIGHT;
   const fillPercent = (fillHeight / TRACK_HEIGHT) * 100;
 
@@ -60,7 +61,7 @@ const AiSliderItem = ({ side, index, val, onChange }) => {
       <span className="mt-1 text-[12px] font-semibold leading-none text-stone-700">+1</span>
 
       <span className={`mt-1 rounded-full px-3 py-1 text-[13px] font-bold text-white shadow-[0_6px_10px_rgba(0,0,0,0.18)] ${isPro ? 'bg-[#77A8F2]' : 'bg-[#FF737D]'}`}>
-        +{val}
+        +{fixedVal}
       </span>
     </div>
   );
