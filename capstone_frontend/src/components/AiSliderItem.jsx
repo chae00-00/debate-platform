@@ -29,7 +29,7 @@ const AiSliderItem = ({ side, index, val, onChange }) => {
   };
 
   return (
-    <div className="flex min-h-[260px] flex-col items-center justify-center gap-2 px-3 py-2 select-none">
+    <div className="flex min-h-[260px] flex-col items-center justify-center gap-2 px-3 py-2 select-none opacity-40">
       <span className="font-semibold text-[15px] text-stone-800">
         AI #{index + 1}
       </span>

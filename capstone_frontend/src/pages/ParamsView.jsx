@@ -114,10 +114,13 @@ const ParamsView = ({
 
           {/* AI 성향 세부 설정 */}
           <div className="mb-32 w-full rounded-[44px] bg-transparent p-2 md:p-4">
-            <div className="mb-6 flex items-center justify-center gap-2">
-              <SlidersHorizontal size={24} className="text-stone-700" />
-              <h3 className="text-2xl font-bold text-stone-800">AI 에이전트 성향 정교화</h3>
+            <div className="mb-3 flex items-center justify-center gap-2">
+              <SlidersHorizontal size={24} className="text-stone-400" />
+              <h3 className="text-2xl font-bold text-stone-400">AI 에이전트 성향 정교화</h3>
             </div>
+            <p className="mb-5 text-center text-[13px] font-semibold text-stone-400">
+              1차 배포 기간동안 강경도는 3으로 고정됩니다
+            </p>
 
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-8">
               <div>
