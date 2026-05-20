@@ -37,7 +37,7 @@ const ParamsView = ({
             key={`${side}-${i}`}
             side={side}
             index={i}
-            val={aiStances[side][i]}
+            val={3}
             onChange={onSliderChange}
           />
         ))}
