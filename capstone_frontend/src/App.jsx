@@ -32,7 +32,10 @@ const App = () => {
     if (window.location.pathname === '/evaluation') return '/evaluation';
     return '/';
   };
-  const [routePath, setRoutePath] = useState(getInitialRoute);
+  const [routePath, setRoutePath] = useState(() => {
+    if (window.location.pathname === '/oauth/callback') return '/oauth/callback';
+    return getInitialRoute();
+  });
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [activeTopic, setActiveTopic] = useState(null);
   const [selectedSubTopics, setSelectedSubTopics] = useState([]);
@@ -46,6 +49,22 @@ const App = () => {
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
   const debateEnterTimeoutRef = useRef(null);
+
+  // OAuth 콜백 처리: /oauth/callback?token=JWT → localStorage 저장 후 홈으로
+  useEffect(() => {
+    if (window.location.pathname !== '/oauth/callback') return;
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (token) {
+      localStorage.setItem('debate_token', token);
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        if (payload.sub) localStorage.setItem('debate_user_id', String(payload.sub));
+      } catch {}
+    }
+    window.history.replaceState({}, '', '/');
+    setRoutePath('/');
+  }, []);
 
   // 오늘의 주제 fetch
   useEffect(() => {

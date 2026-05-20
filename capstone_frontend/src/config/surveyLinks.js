@@ -1,11 +1,10 @@
-const DEFAULT_SURVEY_URL = import.meta.env.VITE_GOOGLE_FORM_URL ?? '';
+const FORM_BASE = 'https://docs.google.com/forms/d/1luwzbqHTfWLXWSCIb4CFE4AHdXOxsKWtng1q4dbGano/viewform';
 
-export const SURVEY_LINKS = {
-  default: DEFAULT_SURVEY_URL,
-  tech: import.meta.env.VITE_GOOGLE_FORM_TECH_URL ?? DEFAULT_SURVEY_URL,
-  economy: import.meta.env.VITE_GOOGLE_FORM_ECONOMY_URL ?? DEFAULT_SURVEY_URL,
-  society: import.meta.env.VITE_GOOGLE_FORM_SOCIETY_URL ?? DEFAULT_SURVEY_URL,
-  science: import.meta.env.VITE_GOOGLE_FORM_SCIENCE_URL ?? DEFAULT_SURVEY_URL,
+export const buildSurveyPrefillUrl = ({ userId = '', topicTitle = '', stance = '' } = {}) => {
+  const params = new URLSearchParams();
+  if (userId) params.set('entry.458874043', userId);
+  if (topicTitle) params.set('entry.797411540', topicTitle);
+  if (stance) params.set('entry.62340958', stance);
+  const qs = params.toString();
+  return qs ? `${FORM_BASE}?${qs}` : FORM_BASE;
 };
-
-export const getSurveyLink = (topicId) => SURVEY_LINKS[topicId] ?? SURVEY_LINKS.default;

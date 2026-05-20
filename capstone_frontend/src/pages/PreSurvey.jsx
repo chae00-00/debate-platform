@@ -1,9 +1,7 @@
 import { ExternalLink, ChevronRight } from 'lucide-react';
-import { getSurveyLink } from '../config/surveyLinks';
+import { buildSurveyPrefillUrl } from '../config/surveyLinks';
 
-const PreSurvey = ({ visible, topicId, activeData, selectedSubTopics = [], onComplete }) => {
-  const surveyUrl = getSurveyLink(topicId);
-  const hasSurveyUrl = Boolean(surveyUrl);
+const PreSurvey = ({ visible, topicId, activeData, selectedSubTopics = [], userStance, onComplete }) => {
   const selected = selectedSubTopics[0];
   const selectedTitle = selected?.title ?? selected;
   const selectedSubTopic = selected?.title
@@ -12,7 +10,10 @@ const PreSurvey = ({ visible, topicId, activeData, selectedSubTopics = [], onCom
   const topicLabel = selectedSubTopic?.title ?? selectedTitle ?? activeData?.title ?? '주제 미선택';
 
   const handleOpenForm = () => {
-    window.open('about:blank', '_blank', 'noopener,noreferrer');
+    const userId = localStorage.getItem('debate_user_id') ?? '';
+    const stance = userStance === 'pro' ? 'PRO' : userStance === 'con' ? 'CON' : '';
+    const url = buildSurveyPrefillUrl({ userId, topicTitle: topicLabel, stance });
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -51,12 +52,7 @@ const PreSurvey = ({ visible, topicId, activeData, selectedSubTopics = [], onCom
           <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <button
               onClick={handleOpenForm}
-              disabled={!hasSurveyUrl}
-              className={`inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-bold transition-all duration-300 ${
-                hasSurveyUrl
-                  ? 'bg-stone-900 text-white shadow-lg hover:scale-105 hover:bg-black'
-                  : 'cursor-not-allowed bg-stone-200 text-stone-400'
-              }`}
+              className="inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-bold transition-all duration-300 bg-stone-900 text-white shadow-lg hover:scale-105 hover:bg-black"
             >
               설문조사 진행하기
               <ExternalLink size={18} />
