@@ -32,4 +32,5 @@ jobs:
             echo "NAVER_CLIENT_ID=$NAVER_CLIENT_ID" >> .env
             echo "NAVER_CLIENT_SECRET=$NAVER_CLIENT_SECRET" >> .env
             docker-compose down
-            docker-compose up -d --build
+            docker-compose build --no-cache
+            docker-compose up -d
