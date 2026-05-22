@@ -147,8 +147,8 @@ export default function DebatePage({
   useEffect(() => {
     if (!stage3Opponent) return;
     resumeQueueRef.current();
-    if (waitingFor === 'user_select_opponent') {
-      submitTurnRef2.current(stage3Opponent.id, 'free_rebuttal', null, false, stage3Opponent.id);
+    if (waitingFor === 'user_select_opponent' || waitingFor === 'user_select_opponent_node') {
+      submitTurnRef2.current(stage3Opponent.id, 'free_rebuttal', null, true, stage3Opponent.id);
     }
   }, [stage3Opponent, waitingFor]);
 
@@ -174,6 +174,7 @@ export default function DebatePage({
       user_opening: 1,
       user_rebuttal: 2,
       user_select_opponent: 3,
+      user_select_opponent_node: 3,
       user_free_rebuttal: 3,
       user_role_reversal: 4,
       user_synthesis: 5,
