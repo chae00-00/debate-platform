@@ -141,12 +141,16 @@ export default function DebatePage({
     }
   }, [currentStage, stage3Opponent, expectedOpponentCount]);
 
-  // 상대가 선택되면 큐 재개
-  useLayoutEffect(() => {
-    if (stage3Opponent) {
-      resumeQueueRef.current();
+  // 상대가 선택되면 큐 재개 + user_select_opponent 단계면 agent_id 자동 submit
+  const submitTurnRef2 = useRef(submitTurn);
+  submitTurnRef2.current = submitTurn;
+  useEffect(() => {
+    if (!stage3Opponent) return;
+    resumeQueueRef.current();
+    if (waitingFor === 'user_select_opponent') {
+      submitTurnRef2.current(stage3Opponent.id, 'free_rebuttal', null, false, stage3Opponent.id);
     }
-  }, [stage3Opponent]);
+  }, [stage3Opponent, waitingFor]);
 
   useEffect(() => {
     if (openingComplete) {
@@ -169,6 +173,7 @@ export default function DebatePage({
     const WAITING_TO_STAGE = {
       user_opening: 1,
       user_rebuttal: 2,
+      user_select_opponent: 3,
       user_free_rebuttal: 3,
       user_role_reversal: 4,
       user_synthesis: 5,
