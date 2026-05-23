@@ -280,7 +280,7 @@ const App = () => {
         />
       )}
 
-      {!isLoginRoute && !isTopicSelectionRoute && !isDebateRoute && !isPostQuizRoute && !isStatsRoute && !isEvaluationRoute && !activeTopic && (
+      {!isLoginRoute && !isTopicSelectionRoute && !isDebateRoute && !isPostQuizRoute && !isStatsRoute && !isEvaluationRoute && !isGuideRoute && !activeTopic && (
         <HomeLanding onCreateDebate={() => navigate('/topics')} onLogin={() => navigate('/login')} onGuide={() => navigate('/guide')} />
       )}
 
