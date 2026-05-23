@@ -233,7 +233,7 @@ export default function ChatPanel({
           });
         })()}
         {/* 타이핑 인디케이터: 토론 종료 후 / 최적해 모달 중 / 5단계 이후 유저 제출 뒤엔 숨김 */}
-        {(isTyping || isBividStreaming) && !debateComplete && !isFinalize && !(currentStage >= 5 && !isMyTurn) && <TypingIndicator speaker={isTyping ?? '비비드'} currentStage={currentStage} />}
+        {isTyping && !debateComplete && !isFinalize && !(currentStage >= 5 && !isMyTurn) && <TypingIndicator speaker={isTyping} currentStage={currentStage} />}
         {/* 비비드: 유저가 아직 해당 스테이지 메시지를 안 보냈을 때만 맨 아래 표시 */}
         {revealedStages.size > 0 && (() => {
           const latestStage = Math.max(...revealedStages);
@@ -255,7 +255,7 @@ export default function ChatPanel({
               : 'border-transparent bg-white/90'
           }`}>
             <InputComposer
-              isMyTurn={isMyTurn}
+              isMyTurn={isMyTurn && !isBividStreaming}
               isProSide={isProSide}
               isFinalize={isFinalize}
               currentStage={currentStage}
