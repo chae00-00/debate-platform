@@ -281,7 +281,7 @@ const App = () => {
       )}
 
       {!isLoginRoute && !isTopicSelectionRoute && !isDebateRoute && !isPostQuizRoute && !isStatsRoute && !isEvaluationRoute && !activeTopic && (
-        <HomeLanding onCreateDebate={() => navigate('/topics')} />
+        <HomeLanding onCreateDebate={() => navigate('/topics')} onLogin={() => navigate('/login')} onGuide={() => navigate('/guide')} />
       )}
 
       {showOnboarding && (
@@ -295,7 +295,7 @@ const App = () => {
         <div className="mx-auto flex min-h-screen w-full items-start justify-center pt-6 md:items-center md:pt-0">
           <FixedStage baseWidth={1440} baseHeight={900}>
             <div className="relative h-[900px] w-[1440px]">
-              <TopHeader onGuide={() => navigate('/guide')} />
+              <TopHeader onGuide={() => navigate('/guide')} onLogin={() => navigate('/login')} />
 
               <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center pt-[96px] text-center">
                 <h1 className="text-[48px] font-extrabold leading-[55px] tracking-[-0.03em] text-[#38332E]">
