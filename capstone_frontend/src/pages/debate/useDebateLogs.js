@@ -5,14 +5,14 @@ import { buildApiUrl } from '../../api';
 // ── 글자 길이 기반 랜덤 딜레이 ────────────────────────────────────────────────
 function getRenderDelay(text, isOneOnOne = false) {
   if (isOneOnOne) {
-    const base = 400;
-    const byLength = Math.min((text?.length ?? 0) * 5, 1000);
-    const jitter = Math.floor(Math.random() * 300);
+    const base = 285;
+    const byLength = Math.min((text?.length ?? 0) * 3.5, 700);
+    const jitter = Math.floor(Math.random() * 215);
     return base + byLength + jitter;
   }
-  const base = 900;
-  const byLength = Math.min((text?.length ?? 0) * 12, 2200);
-  const jitter = Math.floor(Math.random() * 700);
+  const base = 640;
+  const byLength = Math.min((text?.length ?? 0) * 8.5, 1570);
+  const jitter = Math.floor(Math.random() * 500);
   return base + byLength + jitter;
 }
 
@@ -92,7 +92,7 @@ function makeAgentLabelResolver(savedState = null) {
 
 // ── sessionStorage 기반 세션 유지 ────────────────────────────────────────────
 const STORAGE_KEY = 'capstone_debate_session';
-const AGENT_BUBBLE_CHAR_DELAY = 28;
+const AGENT_BUBBLE_CHAR_DELAY = 20;
 
 function saveDebateSession(data) {
   try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}

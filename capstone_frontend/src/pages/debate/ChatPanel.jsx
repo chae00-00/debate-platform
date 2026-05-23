@@ -13,6 +13,24 @@ const STAGE_TO_PHASE = {
 };
 
 function AssistantCard({ text }) {
+  const [displayed, setDisplayed] = useState('');
+  const indexRef = useRef(0);
+
+  useEffect(() => {
+    if (!text) return;
+    setDisplayed('');
+    indexRef.current = 0;
+    const tick = () => {
+      indexRef.current += 1;
+      setDisplayed(text.slice(0, indexRef.current));
+      if (indexRef.current < text.length) {
+        timerId = setTimeout(tick, 18);
+      }
+    };
+    let timerId = setTimeout(tick, 18);
+    return () => clearTimeout(timerId);
+  }, [text]);
+
   if (!text) return null;
   return (
     <div className="flex w-full justify-start">
@@ -23,7 +41,7 @@ function AssistantCard({ text }) {
         <div className="flex flex-col items-start gap-1">
           <span className="text-[11px] font-extrabold text-stone-400 tracking-wide px-1">비비드</span>
           <div className="rounded-[20px] rounded-tl-[6px] border border-stone-600 bg-stone-900 px-4 py-3 shadow-md text-[14px] leading-relaxed">
-            {renderMarkdown(text, true)}
+            {renderMarkdown(displayed, true)}
           </div>
         </div>
       </div>
