@@ -402,6 +402,7 @@ const App = () => {
             onComplete={() => setStage(3)}
           />
           <PreQuiz
+            key={activeTopic}
             topicId={activeTopic}
             activeData={activeData}
             selectedSubTopics={selectedSubTopics}
