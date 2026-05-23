@@ -119,7 +119,12 @@ const App = () => {
     setAiStances({ pro: [3, 3, 3], con: [3, 3, 3] });
     setDebateParams(null);
     setPreparedSessionId(null);
-    try { sessionStorage.removeItem('capstone_prepared_session'); } catch {}
+    try {
+      sessionStorage.removeItem('capstone_prepared_session');
+      sessionStorage.removeItem('capstone_pre_quiz');
+      sessionStorage.removeItem('capstone_post_quiz');
+      sessionStorage.removeItem('capstone_debate_session');
+    } catch {}
     setTutorialOpen(false);
     setTutorialStep(0);
   };
