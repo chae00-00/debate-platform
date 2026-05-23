@@ -388,13 +388,20 @@ export default function DebatePage({
 
       <main className="relative mx-auto h-full max-w-[1920px] p-3 sm:p-4 lg:p-5">
 
-        {/* 뒤로가기 버튼 */}
-        <button
-          onClick={onBack}
-          className="absolute top-4 left-4 z-20 flex items-center justify-center w-8 h-8 rounded-full bg-white/80 shadow-sm text-stone-600 hover:scale-105 transition-transform"
-        >
-          <ArrowLeft size={16} />
-        </button>
+        {/* 상단 바: 뒤로가기 + 주제 */}
+        <div className="absolute top-4 left-4 right-4 z-20 flex items-center gap-3">
+          <button
+            onClick={onBack}
+            className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-white/80 shadow-sm text-stone-600 hover:scale-105 transition-transform"
+          >
+            <ArrowLeft size={16} />
+          </button>
+          {topicLabel && (
+            <span className="truncate rounded-full bg-white/80 backdrop-blur-sm shadow-sm px-4 py-1.5 text-[13px] font-bold text-stone-700">
+              {topicLabel}
+            </span>
+          )}
+        </div>
 
         {/* 메인 레이아웃 */}
         <div className="grid h-full grid-cols-1 gap-4 pl-10 lg:grid-cols-[2.5fr_1fr]">
