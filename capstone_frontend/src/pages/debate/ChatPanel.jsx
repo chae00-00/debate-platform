@@ -12,7 +12,7 @@ const STAGE_TO_PHASE = {
   5: 'synthesis',
 };
 
-function AssistantCard({ text }) {
+function AssistantCard({ text, onStreamingChange }) {
   const [displayed, setDisplayed] = useState('');
   const indexRef = useRef(0);
 
@@ -20,15 +20,18 @@ function AssistantCard({ text }) {
     if (!text) return;
     setDisplayed('');
     indexRef.current = 0;
+    onStreamingChange?.(true);
     const tick = () => {
       indexRef.current += 1;
       setDisplayed(text.slice(0, indexRef.current));
       if (indexRef.current < text.length) {
         timerId = setTimeout(tick, 18);
+      } else {
+        onStreamingChange?.(false);
       }
     };
     let timerId = setTimeout(tick, 18);
-    return () => clearTimeout(timerId);
+    return () => { clearTimeout(timerId); onStreamingChange?.(false); };
   }, [text]);
 
   if (!text) return null;
@@ -122,6 +125,7 @@ export default function ChatPanel({
   const scrollRef = useRef(null);
   const [assistantTexts, setAssistantTexts] = useState({});
   const [revealedStages, setRevealedStages] = useState(new Set());
+  const [isBividStreaming, setIsBividStreaming] = useState(false);
   const prevFetchKey = useRef('');
 
   const phase = STAGE_TO_PHASE[currentStage];
@@ -235,7 +239,7 @@ export default function ChatPanel({
           const latestStage = Math.max(...revealedStages);
           const userAlreadySent = logs.some(l => l.isUser && l.stage === latestStage);
           return !userAlreadySent && assistantTexts[latestStage]
-            ? <AssistantCard text={assistantTexts[latestStage]} />
+            ? <AssistantCard text={assistantTexts[latestStage]} onStreamingChange={setIsBividStreaming} />
             : null;
         })()}
       </div>
@@ -251,7 +255,7 @@ export default function ChatPanel({
               : 'border-transparent bg-white/90'
           }`}>
             <InputComposer
-              isMyTurn={isMyTurn}
+              isMyTurn={isMyTurn && !isBividStreaming}
               isProSide={isProSide}
               isFinalize={isFinalize}
               currentStage={currentStage}
