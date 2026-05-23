@@ -153,7 +153,21 @@ export default function ChatPanel({
     }
   }, [isMyTurn, assistantTexts, currentStage]);
 
+  const userScrolledUpRef = useRef(false);
+
   useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+      userScrolledUpRef.current = !atBottom;
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (userScrolledUpRef.current) return;
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
