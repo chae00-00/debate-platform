@@ -12,7 +12,7 @@ const STAGE_TO_PHASE = {
   5: 'synthesis',
 };
 
-function AssistantCard({ text }) {
+function AssistantCard({ text, onStreamingChange }) {
   const [displayed, setDisplayed] = useState('');
   const indexRef = useRef(0);
 
@@ -20,15 +20,18 @@ function AssistantCard({ text }) {
     if (!text) return;
     setDisplayed('');
     indexRef.current = 0;
+    onStreamingChange?.(true);
     const tick = () => {
       indexRef.current += 1;
       setDisplayed(text.slice(0, indexRef.current));
       if (indexRef.current < text.length) {
         timerId = setTimeout(tick, 18);
+      } else {
+        onStreamingChange?.(false);
       }
     };
     let timerId = setTimeout(tick, 18);
-    return () => clearTimeout(timerId);
+    return () => { clearTimeout(timerId); onStreamingChange?.(false); };
   }, [text]);
 
   if (!text) return null;
@@ -121,6 +124,7 @@ export default function ChatPanel({
   const scrollRef = useRef(null);
   const [assistantTexts, setAssistantTexts] = useState({});
   const [revealedStages, setRevealedStages] = useState(new Set());
+  const [isBividStreaming, setIsBividStreaming] = useState(false);
   const prevFetchKey = useRef('');
 
   const phase = STAGE_TO_PHASE[currentStage];
@@ -223,13 +227,13 @@ export default function ChatPanel({
           });
         })()}
         {/* 타이핑 인디케이터: 토론 종료 후 / 최적해 모달 중 / 5단계 이후 유저 제출 뒤엔 숨김 */}
-        {isTyping && !debateComplete && !isFinalize && !(currentStage >= 5 && !isMyTurn) && <TypingIndicator speaker={isTyping} currentStage={currentStage} />}
+        {(isTyping || isBividStreaming) && !debateComplete && !isFinalize && !(currentStage >= 5 && !isMyTurn) && <TypingIndicator speaker={isTyping ?? '비비드'} currentStage={currentStage} />}
         {/* 비비드: 유저가 아직 해당 스테이지 메시지를 안 보냈을 때만 맨 아래 표시 */}
         {revealedStages.size > 0 && (() => {
           const latestStage = Math.max(...revealedStages);
           const userAlreadySent = logs.some(l => l.isUser && l.stage === latestStage);
           return !userAlreadySent && assistantTexts[latestStage]
-            ? <AssistantCard text={assistantTexts[latestStage]} />
+            ? <AssistantCard text={assistantTexts[latestStage]} onStreamingChange={setIsBividStreaming} />
             : null;
         })()}
       </div>
