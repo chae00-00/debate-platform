@@ -186,9 +186,13 @@ export default function ChatPanel({
         className="hide-scrollbar flex-1 overflow-y-auto p-4 space-y-4"
       >
         {topicLabel && (
-          <p className="text-center text-[13px] font-medium text-stone-400 pt-1 pb-2">
-            주제: {topicLabel}
-          </p>
+          <div className="flex justify-center pt-2 pb-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/80 px-4 py-2 shadow-sm">
+              <span className="text-[11px] font-extrabold tracking-widest text-stone-400">주제</span>
+              <span className="h-3 w-px bg-stone-200" />
+              <span className="text-[13px] font-bold text-stone-700">{topicLabel}</span>
+            </div>
+          </div>
         )}
         {(() => {
           const STAGE_LABELS = {
