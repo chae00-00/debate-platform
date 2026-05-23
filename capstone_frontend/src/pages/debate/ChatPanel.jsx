@@ -187,7 +187,7 @@ export default function ChatPanel({
       >
         {topicLabel && (
           <p className="text-center text-[13px] font-medium text-stone-400 pt-1 pb-2">
-            {topicLabel}
+            주제: {topicLabel}
           </p>
         )}
         {(() => {

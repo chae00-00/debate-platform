@@ -19,6 +19,7 @@ import PostQuiz from './pages/PostQuiz';
 import PostDebateStats from './pages/PostDebateStats';
 import FinalEvaluation from './pages/FinalEvaluation';
 import DebateTutorialModal from './components/DebateTutorialModal';
+import ServiceIntroPage from './pages/ServiceIntroPage';
 import Login from './pages/Login';
 import { prepareDebate } from './api/debatesApi';
 
@@ -30,6 +31,7 @@ const App = () => {
     if (window.location.pathname === '/post-quiz') return '/post-quiz';
     if (window.location.pathname === '/stats') return '/stats';
     if (window.location.pathname === '/evaluation') return '/evaluation';
+    if (window.location.pathname === '/guide') return '/guide';
     return '/';
   };
   const [routePath, setRoutePath] = useState(() => {
@@ -82,6 +84,7 @@ const App = () => {
   const isPostQuizRoute = routePath === '/post-quiz';
   const isStatsRoute = routePath === '/stats';
   const isEvaluationRoute = routePath === '/evaluation';
+  const isGuideRoute = routePath === '/guide';
 
   const preDebateBackground = userStance === 'pro'
     ? 'linear-gradient(to bottom right, rgba(147,197,253,0.38), rgba(219,234,254,0.22), rgba(245,245,244,0.08))'
@@ -347,6 +350,10 @@ const App = () => {
           onExit={handleEndDebate}
           topicLabel={getSelectedTopicLabel()}
         />
+      )}
+
+      {isGuideRoute && (
+        <ServiceIntroPage onBack={() => navigate('/')} />
       )}
 
       {/* [3] 풀스크린 오버레이 */}
