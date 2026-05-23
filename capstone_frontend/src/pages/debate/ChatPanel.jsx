@@ -120,6 +120,7 @@ export default function ChatPanel({
   onSubmitTurn,
   stage3Opponent,
   sessionId,
+  topicLabel = '',
 }) {
   const scrollRef = useRef(null);
   const [assistantTexts, setAssistantTexts] = useState({});
@@ -184,6 +185,11 @@ export default function ChatPanel({
         ref={scrollRef}
         className="hide-scrollbar flex-1 overflow-y-auto p-4 space-y-4"
       >
+        {topicLabel && (
+          <p className="text-center text-[13px] font-medium text-stone-400 pt-1 pb-2">
+            {topicLabel}
+          </p>
+        )}
         {(() => {
           const STAGE_LABELS = {
             1: '1단계 — 입론',
