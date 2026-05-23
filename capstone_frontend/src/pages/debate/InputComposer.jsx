@@ -3,13 +3,13 @@ import { SendHorizonal, Mic, Plus, X } from 'lucide-react';
 import { MAX_ARGUMENT_TABS } from './mockData';
 
 const MIN_CHARS = {
-  intro: 45,
-  argument: 100,
-  conclusion: 75,
-  stage2Turn: 130,
-  stage3: 130,
-  roleReversalArgument: 60,
-  roleReversalConclusion: 60,
+  intro: 34,
+  argument: 75,
+  conclusion: 56,
+  stage2Turn: 98,
+  stage3: 98,
+  roleReversalArgument: 45,
+  roleReversalConclusion: 45,
 };
 
 export default function InputComposer({
@@ -142,13 +142,15 @@ export default function InputComposer({
   // ── Validation helpers ────────────────────────────────────────────────────
   const validateOpening = () => {
     const intro = composerIntro.trim();
-    if (intro && intro.length < MIN_CHARS.intro) return '자기소개와 입장은 최소 45자 이상 작성해주세요.';
+    if (!intro || intro.length < MIN_CHARS.intro) return `자기소개와 입장은 최소 ${MIN_CHARS.intro}자 이상 작성해주세요.`;
+    const hasArg = composerArguments.some(a => a.trim().length > 0);
+    if (!hasArg) return '논거를 최소 1개 이상 작성해주세요.';
     for (const arg of composerArguments) {
       const t = arg.trim();
-      if (t && t.length < MIN_CHARS.argument) return '논거는 최소 100자 이상 작성해주세요.';
+      if (t && t.length < MIN_CHARS.argument) return `논거는 최소 ${MIN_CHARS.argument}자 이상 작성해주세요.`;
     }
     const conclusion = composerConclusion.trim();
-    if (conclusion && conclusion.length < MIN_CHARS.conclusion) return '결론은 최소 75자 이상 작성해주세요.';
+    if (!conclusion || conclusion.length < MIN_CHARS.conclusion) return `결론은 최소 ${MIN_CHARS.conclusion}자 이상 작성해주세요.`;
     return '';
   };
 
