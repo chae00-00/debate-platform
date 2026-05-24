@@ -63,8 +63,8 @@ function AssistantCard({ text, onStreamingChange, instant }) {
   return (
     <div className="flex w-full justify-start">
       <div className="flex items-start gap-2 max-w-[88%]">
-        <div className="mt-0.5 h-9 w-9 shrink-0 select-none">
-          <img src={vividImg} alt="비비드" className="h-full w-full object-contain" />
+        <div className="mt-0.5 h-9 w-9 shrink-0 overflow-hidden rounded-full select-none">
+          <img src={vividImg} alt="비비드" className="h-full w-full object-cover" />
         </div>
         <div className="flex flex-col items-start gap-1">
           <span className="text-[11px] font-extrabold text-stone-400 tracking-wide px-1">비비드</span>
