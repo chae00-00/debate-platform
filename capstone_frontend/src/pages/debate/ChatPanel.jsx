@@ -12,30 +12,41 @@ const STAGE_TO_PHASE = {
   5: 'synthesis',
 };
 
-// 마크다운 링크 [텍스트](url) 구간의 끝 인덱스를 반환. 링크가 아니면 -1.
-function findMarkdownLinkEnd(text, startIdx) {
-  if (text[startIdx] !== '[') return -1;
-  const closeSquare = text.indexOf(']', startIdx + 1);
-  if (closeSquare === -1 || text[closeSquare + 1] !== '(') return -1;
-  const closeParen = text.indexOf(')', closeSquare + 2);
-  if (closeParen === -1) return -1;
-  return closeParen + 1;
+// [텍스트](url) 또는 plain https?:// URL 구간의 끝 인덱스를 반환. 해당 없으면 -1.
+function skipLinkAt(text, startIdx) {
+  const char = text[startIdx];
+  if (char === '[') {
+    const closeSquare = text.indexOf(']', startIdx + 1);
+    if (closeSquare !== -1 && text[closeSquare + 1] === '(') {
+      const closeParen = text.indexOf(')', closeSquare + 2);
+      if (closeParen !== -1) return closeParen + 1;
+    }
+  }
+  if (char === 'h') {
+    const sub = text.slice(startIdx);
+    const m = sub.match(/^https?:\/\/[^\s,)>\]]+/);
+    if (m) return startIdx + m[0].length;
+  }
+  return -1;
 }
 
-function AssistantCard({ text, onStreamingChange }) {
-  const [displayed, setDisplayed] = useState('');
-  const indexRef = useRef(0);
+function AssistantCard({ text, onStreamingChange, instant }) {
+  const [displayed, setDisplayed] = useState(instant ? (text ?? '') : '');
+  const indexRef = useRef(instant ? (text?.length ?? 0) : 0);
 
   useEffect(() => {
     if (!text) return;
+    if (instant) {
+      setDisplayed(text);
+      return;
+    }
     setDisplayed('');
     indexRef.current = 0;
     onStreamingChange?.(true);
     const tick = () => {
       indexRef.current += 1;
-      // 마크다운 링크 구간이면 링크 끝까지 한번에 건너뜀
-      const linkEnd = findMarkdownLinkEnd(text, indexRef.current - 1);
-      if (linkEnd !== -1) indexRef.current = linkEnd;
+      const skipEnd = skipLinkAt(text, indexRef.current - 1);
+      if (skipEnd !== -1) indexRef.current = skipEnd;
       setDisplayed(text.slice(0, indexRef.current));
       if (indexRef.current < text.length) {
         timerId = setTimeout(tick, 18);
@@ -45,7 +56,7 @@ function AssistantCard({ text, onStreamingChange }) {
     };
     let timerId = setTimeout(tick, 18);
     return () => { clearTimeout(timerId); onStreamingChange?.(false); };
-  }, [text]);
+  }, [text, instant]);
 
   if (!text) return null;
   return (
@@ -226,7 +237,7 @@ export default function ChatPanel({
             let bividBefore = null;
             if (log.isUser && !insertedBividStages.has(log.stage)
                 && revealedStages.has(log.stage) && assistantTexts[log.stage]) {
-              bividBefore = <AssistantCard key={`bivid-${log.stage}`} text={assistantTexts[log.stage]} />;
+              bividBefore = <AssistantCard key={`bivid-${log.stage}`} text={assistantTexts[log.stage]} instant />;
               insertedBividStages.add(log.stage);
             }
 

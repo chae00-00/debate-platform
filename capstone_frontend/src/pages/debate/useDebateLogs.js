@@ -616,7 +616,7 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
           if (type === 'turn') {
             const log = buildLogFromSSE(raw.entry, resolveLabelRef.current);
             console.log(`[SSE submit] turn 수신: speaker=${log.speaker} speakerId=${raw.entry?.speaker_id ?? raw.entry?.speakerId} stance=${raw.entry?.stance} turn=${log.turnNumber}`);
-            if (log.speaker === '나') continue;
+            // 분석은 사용자 턴 이벤트에 붙어 오므로 continue 전에 먼저 처리
             if (raw.analysis) {
               const snapshot = buildLiveAnalysisSnapshot(raw.analysis);
               const isUser = snapshot.speakerId === 'user' || snapshot.speakerId === '사용자';
@@ -626,6 +626,7 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
                 log._analysis = snapshot;
               }
             }
+            if (log.speaker === '나') continue;
             queueRef.current.push(log);
             if (!isPlayingRef.current) playNextRef.current?.();
           } else if (type === 'waiting') {
