@@ -12,6 +12,16 @@ const STAGE_TO_PHASE = {
   5: 'synthesis',
 };
 
+// 마크다운 링크 [텍스트](url) 구간의 끝 인덱스를 반환. 링크가 아니면 -1.
+function findMarkdownLinkEnd(text, startIdx) {
+  if (text[startIdx] !== '[') return -1;
+  const closeSquare = text.indexOf(']', startIdx + 1);
+  if (closeSquare === -1 || text[closeSquare + 1] !== '(') return -1;
+  const closeParen = text.indexOf(')', closeSquare + 2);
+  if (closeParen === -1) return -1;
+  return closeParen + 1;
+}
+
 function AssistantCard({ text, onStreamingChange }) {
   const [displayed, setDisplayed] = useState('');
   const indexRef = useRef(0);
@@ -23,6 +33,9 @@ function AssistantCard({ text, onStreamingChange }) {
     onStreamingChange?.(true);
     const tick = () => {
       indexRef.current += 1;
+      // 마크다운 링크 구간이면 링크 끝까지 한번에 건너뜀
+      const linkEnd = findMarkdownLinkEnd(text, indexRef.current - 1);
+      if (linkEnd !== -1) indexRef.current = linkEnd;
       setDisplayed(text.slice(0, indexRef.current));
       if (indexRef.current < text.length) {
         timerId = setTimeout(tick, 18);

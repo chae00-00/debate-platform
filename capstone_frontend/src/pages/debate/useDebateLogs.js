@@ -155,6 +155,7 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
   const [freeRebuttalUserTurnCount, setFreeRebuttalUserTurnCount] = useState(0);
   const [liveAnalysis, setLiveAnalysis] = useState(null);
   const sessionIdRef = useRef(null);
+  const saveTimerRef = useRef(null);
 
   const queueRef = useRef([]);
   const isPlayingRef = useRef(false);
@@ -340,18 +341,22 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
     return () => clearTimer();
   }, [debateParams, resetState, startQueue, clearTimer]);
 
-  // ── sessionStorage 저장: 로그·세션 상태가 바뀔 때마다 갱신 ──────────────────
+  // ── sessionStorage 저장: 디바운스(1초)로 저장 빈도 제한 ─────────────────────
+  // streamAgentLog가 20ms마다 visibleLogs를 갱신하므로 매 프레임 저장 방지
   useEffect(() => {
     if (!debateParams || visibleLogs.length === 0) return;
-    saveDebateSession({
-      debateParams,
-      logs: visibleLogs,
-      sessionId: sessionIdRef.current,
-      openingComplete,
-      waitingFor,
-      debateComplete,
-      resolverState: resolveLabelRef.current.getState?.() ?? null,
-    });
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      saveDebateSession({
+        debateParams,
+        logs: visibleLogs,
+        sessionId: sessionIdRef.current,
+        openingComplete,
+        waitingFor,
+        debateComplete,
+        resolverState: resolveLabelRef.current.getState?.() ?? null,
+      });
+    }, 1000);
   }, [visibleLogs, openingComplete, waitingFor, debateComplete, debateParams]);
 
   // ── SSE 모드: POST /api/debates ──────────────────────────────────────────────
