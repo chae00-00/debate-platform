@@ -18,7 +18,6 @@ import DebatePage from './pages/debate/DebatePage';
 import PostQuiz from './pages/PostQuiz';
 import PostDebateStats from './pages/PostDebateStats';
 import FinalEvaluation from './pages/FinalEvaluation';
-import DebateTutorialModal from './components/DebateTutorialModal';
 import ServiceIntroPage from './pages/ServiceIntroPage';
 import Login from './pages/Login';
 import { prepareDebate } from './api/debatesApi';
@@ -48,8 +47,6 @@ const App = () => {
   const [topics, setTopics] = useState(TOPICS); // 기본값: 하드코딩 데이터 (API 실패 시 fallback)
   const [debateParams, setDebateParams] = useState(null);
   const [preparedSessionId, setPreparedSessionId] = useState(null);
-  const [tutorialOpen, setTutorialOpen] = useState(false);
-  const [tutorialStep, setTutorialStep] = useState(0);
   const debateEnterTimeoutRef = useRef(null);
 
   // OAuth 콜백 처리: /oauth/callback?token=JWT → localStorage 저장 후 홈으로
@@ -128,8 +125,6 @@ const App = () => {
       sessionStorage.removeItem('capstone_post_quiz');
       sessionStorage.removeItem('capstone_debate_session');
     } catch {}
-    setTutorialOpen(false);
-    setTutorialStep(0);
   };
 
   const handleTopicClick = (id) => {
@@ -235,25 +230,7 @@ const App = () => {
   };
 
   const handleEnterDebate = () => {
-    setTutorialStep(0);
-    setTutorialOpen(true);
-  };
-
-  const handleTutorialClose = () => {
-    setTutorialOpen(false);
     startDebate();
-  };
-
-  const handleTutorialNext = () => {
-    if (tutorialStep >= 4) {
-      handleTutorialClose();
-      return;
-    }
-    setTutorialStep((prev) => prev + 1);
-  };
-
-  const handleTutorialPrev = () => {
-    setTutorialStep((prev) => Math.max(0, prev - 1));
   };
 
   return (
@@ -439,15 +416,6 @@ const App = () => {
         onEnter={handleEnter}
       />}
 
-      <DebateTutorialModal
-        open={tutorialOpen}
-        stepIndex={tutorialStep}
-        agentCount={agentCount}
-        userStance={userStance}
-        onPrev={handleTutorialPrev}
-        onNext={handleTutorialNext}
-        onClose={handleTutorialClose}
-      />
     </div>
   );
 };

@@ -3,6 +3,7 @@ import SpeechBubble from './SpeechBubble';
 import InputComposer from './InputComposer';
 import { getAssistantGuide } from '../../api/debatesApi';
 import { renderMarkdown } from './markdownRenderer';
+import vividImg from '../../assets/vivid.png';
 
 const STAGE_TO_PHASE = {
   1: 'opening',
@@ -62,8 +63,8 @@ function AssistantCard({ text, onStreamingChange, instant }) {
   return (
     <div className="flex w-full justify-start">
       <div className="flex items-start gap-2 max-w-[88%]">
-        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-stone-900 border border-stone-600 text-white text-[12px] font-black select-none">
-          V
+        <div className="mt-0.5 h-9 w-9 shrink-0 select-none">
+          <img src={vividImg} alt="비비드" className="h-full w-full object-contain" />
         </div>
         <div className="flex flex-col items-start gap-1">
           <span className="text-[11px] font-extrabold text-stone-400 tracking-wide px-1">비비드</span>
