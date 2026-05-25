@@ -33,7 +33,7 @@ jobs:
             echo "NAVER_CLIENT_ID=$NAVER_CLIENT_ID" >> .env
             echo "NAVER_CLIENT_SECRET=$NAVER_CLIENT_SECRET" >> .env
             docker-compose down
-            docker system prune -af --volumes
+            docker system prune -af
             docker builder prune -af || true
             sudo journalctl --vacuum-size=50M || true
             sudo apt-get clean -y || true

@@ -173,7 +173,7 @@ export default function ChatPanel({
 
   // isMyTurn이 되고 텍스트가 준비된 순간 한 번만 reveal — 이후 유저 제출해도 유지
   useEffect(() => {
-    if (isMyTurn && assistantTexts[currentStage]) {
+    if (isMyTurn && !isTyping && assistantTexts[currentStage]) {
       setRevealedStages((prev) => {
         if (prev.has(currentStage)) return prev;
         const next = new Set(prev);
@@ -181,7 +181,7 @@ export default function ChatPanel({
         return next;
       });
     }
-  }, [isMyTurn, assistantTexts, currentStage]);
+  }, [isMyTurn, isTyping, assistantTexts, currentStage]);
 
   const userScrolledUpRef = useRef(false);
 
@@ -264,7 +264,7 @@ export default function ChatPanel({
         {/* 타이핑 인디케이터: 토론 종료 후 / 최적해 모달 중 / 5단계 이후 유저 제출 뒤엔 숨김 */}
         {isTyping && !debateComplete && !isFinalize && !(currentStage >= 5 && !isMyTurn) && <TypingIndicator speaker={isTyping} currentStage={currentStage} />}
         {/* 비비드: 유저가 아직 해당 스테이지 메시지를 안 보냈을 때만 맨 아래 표시 */}
-        {revealedStages.size > 0 && (() => {
+        {revealedStages.size > 0 && !isTyping && (() => {
           const latestStage = Math.max(...revealedStages);
           const userAlreadySent = logs.some(l => l.isUser && l.stage === latestStage);
           return !userAlreadySent && assistantTexts[latestStage]
