@@ -10,13 +10,11 @@ RUN chmod +x gradlew
 
 # 의존성 캐싱을 위해 먼저 복사
 COPY build.gradle settings.gradle ./
-RUN --mount=type=cache,target=/root/.gradle \
-    ./gradlew dependencies --no-daemon || true
+RUN ./gradlew dependencies --no-daemon || true
 
 # 소스 복사 및 빌드
 COPY src src
-RUN --mount=type=cache,target=/root/.gradle \
-    ./gradlew bootJar --no-daemon
+RUN ./gradlew bootJar --no-daemon
 
 # 실행 이미지
 FROM eclipse-temurin:17-jre-alpine
