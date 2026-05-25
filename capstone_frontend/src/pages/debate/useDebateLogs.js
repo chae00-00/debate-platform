@@ -148,7 +148,7 @@ function buildLogFromSSE(raw, resolveLabel) {
  *   error            — 오류 메시지
  *   submitOpening    — 사용자 입론 제출 함수
  */
-export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', preparedSessionId = null) {
+export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', preparedSessionId = null, debateMode = 'constructive') {
   const [visibleLogs, setVisibleLogs] = useState([]);
   const [isTyping, setIsTyping] = useState(null);
   const [awaitingUserTurn, setAwaitingUserTurn] = useState(false);
@@ -463,6 +463,12 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
             const wf = raw.waiting_for ?? raw.waitingFor ?? null;
             const finished = raw.is_finished ?? raw.isFinished ?? false;
             const draft = raw.synthesis_draft ?? raw.synthesisDraft ?? null;
+            // 일반 토론: 자유논박 완료 후 역할반전 진입 시점에 강제 종료
+            if (debateMode === 'general' && (wf === 'role_reversal_node' || wf === 'user_role_reversal')) {
+              ctrl.abort();
+              setDebateComplete(true);
+              return;
+            }
             setWaitingFor(wf);
             if (finished) {
               if (draft) setSynthesisDraft(draft);
@@ -639,6 +645,11 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
             const wf = raw.waiting_for ?? raw.waitingFor ?? null;
             const finished = raw.is_finished ?? raw.isFinished ?? false;
             const draft = raw.synthesis_draft ?? raw.synthesisDraft ?? null;
+            // 일반 토론: 자유논박 완료 후 역할반전 진입 시점에 강제 종료
+            if (debateMode === 'general' && (wf === 'role_reversal_node' || wf === 'user_role_reversal')) {
+              setDebateComplete(true);
+              return;
+            }
             setWaitingFor(wf);
             if (finished) {
               if (draft) setSynthesisDraft(draft);

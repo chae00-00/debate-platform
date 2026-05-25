@@ -17,20 +17,31 @@ const INFO_CARDS = [
 
 const ACTION_BUBBLES = [
   {
-    id: 'create',
-    label: '새 토론 생성하기',
-    shellClassName: 'left-[736px] top-[144px] h-[330px] w-[330px]',
+    id: 'constructive',
+    label: '구성적 논쟁',
+    shellClassName: 'left-[636px] top-[144px] h-[330px] w-[330px]',
     buttonClassName: 'h-[330px] w-[330px] bg-[#4A8768] text-[30px]',
-    onClickKey: 'create',
+    onClickKey: 'constructive',
     duration: '6.1s',
     delay: '-0.7s',
     floatY: '-12px',
     floatX: '7px',
   },
   {
+    id: 'general',
+    label: '일반 토론',
+    shellClassName: 'left-[996px] top-[164px] h-[290px] w-[290px]',
+    buttonClassName: 'h-[290px] w-[290px] bg-[#31465D] text-[28px]',
+    onClickKey: 'general',
+    duration: '7.2s',
+    delay: '-2.4s',
+    floatY: '-14px',
+    floatX: '8px',
+  },
+  {
     id: 'profile',
     label: '내 정보 수정',
-    shellClassName: 'left-[1112px] top-[224px] h-[176px] w-[176px]',
+    shellClassName: 'left-[1112px] top-[480px] h-[176px] w-[176px]',
     buttonClassName: 'h-[176px] w-[176px] bg-[#6F4141] text-[18px]',
     onClickKey: 'profile',
     duration: '6.8s',
@@ -38,26 +49,14 @@ const ACTION_BUBBLES = [
     floatY: '-10px',
     floatX: '-6px',
   },
-  {
-    id: 'history',
-    label: '토론 내역 보기',
-    shellClassName: 'left-[978px] top-[430px] h-[292px] w-[292px]',
-    buttonClassName: 'h-[292px] w-[292px] bg-[#31465D] text-[28px]',
-    onClickKey: 'history',
-    duration: '7.2s',
-    delay: '-2.4s',
-    floatY: '-14px',
-    floatX: '8px',
-  },
 ];
 
 const HomeLanding = ({ onCreateDebate, onLogin, onGuide }) => {
   const [hoveredBubble, setHoveredBubble] = useState(null);
 
   const handleBubbleClick = (key) => {
-    if (key === 'create') {
-      onCreateDebate();
-    }
+    if (key === 'constructive') onCreateDebate('constructive');
+    if (key === 'general') onCreateDebate('general');
   };
 
   return (

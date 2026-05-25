@@ -42,6 +42,7 @@ export default function DebatePage({
   preparedSessionId = null,
   agentCount = 2,
   userStance = 'pro',
+  debateMode = 'constructive',
   topicLabel = '',
 }) {
   const [showSearchPopup, setShowSearchPopup] = useState(!!debateParams);
@@ -71,7 +72,7 @@ export default function DebatePage({
     pauseQueue,
     resumeQueue,
     sessionId,
-  } = useDebateLogs(debateParams, agentCount, userStance, preparedSessionId);
+  } = useDebateLogs(debateParams, agentCount, userStance, preparedSessionId, debateMode);
 
   // logs에서 실시간으로 진행 상황 파악 (useDebateLogs 이후에 선언)
   const stage1Count = useMemo(

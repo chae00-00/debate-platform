@@ -41,6 +41,7 @@ const App = () => {
   const [activeTopic, setActiveTopic] = useState(null);
   const [selectedSubTopics, setSelectedSubTopics] = useState([]);
   const [stage, setStage] = useState(0); // 0: 세부주제, 1: 참여설정, 2: 사전설문, 3: 사전퀴즈, 4: 토론
+  const [debateMode, setDebateMode] = useState('constructive'); // 'constructive' | 'general'
   const [userStance, setUserStance] = useState(null);
   const [agentCount, setAgentCount] = useState(1);
   const [aiStances, setAiStances] = useState({ pro: [3, 3, 3], con: [3, 3, 3] });
@@ -116,6 +117,7 @@ const App = () => {
       debateEnterTimeoutRef.current = null;
     }
     setStage(0);
+    setDebateMode('constructive');
     setUserStance(null);
     setAgentCount(1);
     setAiStances({ pro: [3, 3, 3], con: [3, 3, 3] });
@@ -260,7 +262,7 @@ const App = () => {
       )}
 
       {!isLoginRoute && !isTopicSelectionRoute && !isDebateRoute && !isPostQuizRoute && !isStatsRoute && !isEvaluationRoute && !isGuideRoute && !activeTopic && (
-        <HomeLanding onCreateDebate={() => navigate('/topics')} onLogin={() => navigate('/login')} onGuide={() => navigate('/guide')} />
+        <HomeLanding onCreateDebate={(mode) => { setDebateMode(mode ?? 'constructive'); navigate('/topics'); }} onLogin={() => navigate('/login')} onGuide={() => navigate('/guide')} />
       )}
 
       {showOnboarding && (
@@ -299,6 +301,7 @@ const App = () => {
           preparedSessionId={preparedSessionId}
           userStance={userStance}
           agentCount={agentCount}
+          debateMode={debateMode}
           topicLabel={getSelectedTopicLabel()}
           onBack={() => navigate('/topics')}
           onExit={() => navigate('/post-quiz')}
