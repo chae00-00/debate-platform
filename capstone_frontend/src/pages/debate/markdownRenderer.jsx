@@ -80,9 +80,9 @@ export function renderMarkdown(text, isMine) {
           {renderInlineNodes(line.slice(5), isMine)}
         </div>
       );
-    } else if (line.trim() === '---') {
+    } else if (/^-{3,}$/.test(line.trim())) {
       elements.push(
-        <hr key={key++} className={`my-2 border-0 border-t ${isMine ? 'border-white/20' : 'border-stone-200'}`} />
+        <div key={key++} className={`my-2 h-px w-full ${isMine ? 'bg-white/20' : 'bg-stone-200'}`} />
       );
     } else if (/^[-*] /.test(line)) {
       elements.push(
