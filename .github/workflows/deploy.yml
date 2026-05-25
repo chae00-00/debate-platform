@@ -28,6 +28,7 @@ jobs:
           username: ${{ secrets.GCE_USERNAME }}
           key: ${{ secrets.GCE_SSH_KEY }}
           envs: KAKAO_CLIENT_ID,KAKAO_CLIENT_SECRET,NAVER_CLIENT_ID,NAVER_CLIENT_SECRET
+          command_timeout: 30m
           script: |
             cd ~/debate-platform
             git fetch origin
@@ -36,6 +37,8 @@ jobs:
             echo "KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET" >> .env
             echo "NAVER_CLIENT_ID=$NAVER_CLIENT_ID" >> .env
             echo "NAVER_CLIENT_SECRET=$NAVER_CLIENT_SECRET" >> .env
+            export DOCKER_BUILDKIT=1
+            export COMPOSE_DOCKER_CLI_BUILD=1
             docker-compose down
             sudo journalctl --vacuum-size=50M || true
             sudo apt-get clean -y || true
