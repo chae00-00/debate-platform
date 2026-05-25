@@ -443,7 +443,7 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
             setSessionId(sid);
           } else if (type === 'turn') {
             const log = buildLogFromSSE(raw.entry, resolveLabelRef.current);
-            console.log(`[SSE stream] turn 수신: speaker=${log.speaker} speakerId=${raw.entry?.speaker_id ?? raw.entry?.speakerId} stance=${raw.entry?.stance} turn=${log.turnNumber}`);
+            console.log(`[SSE stream] turn 수신: speaker=${log.speaker} speakerId=${raw.entry?.speaker_id ?? raw.entry?.speakerId} stance=${raw.entry?.stance} turn=${log.turnNumber} targetId=${log.targetId ?? 'null'} targetLabel=${log.targetLabel ?? 'null'}`);
             if (!firstEntryReceivedRef.current) {
               log.skipDelay = true;
               firstEntryReceivedRef.current = true;
@@ -630,7 +630,7 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
           const raw = JSON.parse(data);
           if (type === 'turn') {
             const log = buildLogFromSSE(raw.entry, resolveLabelRef.current);
-            console.log(`[SSE submit] turn 수신: speaker=${log.speaker} speakerId=${raw.entry?.speaker_id ?? raw.entry?.speakerId} stance=${raw.entry?.stance} turn=${log.turnNumber}`);
+            console.log(`[SSE submit] turn 수신: speaker=${log.speaker} speakerId=${raw.entry?.speaker_id ?? raw.entry?.speakerId} stance=${raw.entry?.stance} turn=${log.turnNumber} targetId=${log.targetId ?? 'null'} targetLabel=${log.targetLabel ?? 'null'}`);
             // 분석은 사용자 턴 이벤트에 붙어 오므로 continue 전에 먼저 처리
             if (raw.analysis) {
               const snapshot = buildLiveAnalysisSnapshot(raw.analysis);

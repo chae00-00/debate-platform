@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1.4
 # Multi-stage 빌드
 FROM eclipse-temurin:17-jdk-alpine AS build
 
