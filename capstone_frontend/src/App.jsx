@@ -59,6 +59,7 @@ const App = () => {
       try {
         const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
         if (payload.sub) localStorage.setItem('debate_user_id', String(payload.sub));
+        if (payload.nickname) localStorage.setItem('debate_user_nickname', String(payload.nickname));
       } catch {}
     }
     window.history.replaceState({}, '', '/');

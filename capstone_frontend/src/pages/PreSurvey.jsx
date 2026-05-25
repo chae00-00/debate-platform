@@ -10,9 +10,9 @@ const PreSurvey = ({ visible, topicId, activeData, selectedSubTopics = [], userS
   const topicLabel = selectedSubTopic?.title ?? selectedTitle ?? activeData?.title ?? '주제 미선택';
 
   const handleOpenForm = () => {
-    const userId = localStorage.getItem('debate_user_id') ?? '';
+    const nickname = localStorage.getItem('debate_user_nickname') ?? '';
     const stance = userStance === 'pro' ? 'PRO' : userStance === 'con' ? 'CON' : '';
-    const url = buildSurveyPrefillUrl({ userId, topicTitle: topicLabel, stance });
+    const url = buildSurveyPrefillUrl({ nickname, topicTitle: topicLabel, stance });
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
