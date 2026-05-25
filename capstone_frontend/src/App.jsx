@@ -193,6 +193,7 @@ const App = () => {
       debateFormat: `${agentCount}:${agentCount}`,
       agentIntensities,
       maxCycle: 3,
+      mode: debateMode === 'general' ? 'debate' : 'constructive',
     });
     setStage(2); // 참여설정 → 사전설문
   };
