@@ -60,6 +60,9 @@ const PHASE_TO_STAGE = {
   free_rebuttal: 3,
   role_reversal: 4,
   synthesis: 5,
+  synthesis_discuss: 5,
+  reconceptualization: 5,
+  recon: 5,
 };
 
 const PHASE_TO_TYPE = {
@@ -68,6 +71,9 @@ const PHASE_TO_TYPE = {
   free_rebuttal: '논박',
   role_reversal: '역할반전',
   synthesis: '종합',
+  synthesis_discuss: '종합',
+  reconceptualization: '종합',
+  recon: '종합',
 };
 
 

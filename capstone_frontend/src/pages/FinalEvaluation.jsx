@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Star, User, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import BackgroundBubbles from '../components/BackgroundBubbles';
+import { buildSurveyPrefillUrl } from '../config/surveyLinks';
 
 // Material Symbols 아이콘 컴포넌트
 function MIcon({ name, size = 20, fill = 0, weight = 400, className = '' }) {
@@ -384,7 +385,7 @@ function mapToTriMetrics(phase) {
 }
 
 // ─── 메인 페이지 ─────────────────────────────────────────────────────────────
-export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, topicLabel = '토론 최종 평가' }) {
+export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, topicLabel = '토론 최종 평가', userStance = '' }) {
   const [evalData, setEvalData]     = useState(null);
   const [swingTurns, setSwingTurns] = useState(null);
   const [evalLoading, setEvalLoading]   = useState(true);
@@ -598,7 +599,15 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
 
         {/* 하단 버튼 */}
         <div className="flex w-full justify-end rounded-[28px] border border-white/80 bg-white/80 px-5 py-3.5 backdrop-blur-md shadow-[0_16px_32px_rgba(0,0,0,0.08)]">
-          <button type="button" onClick={onExit}
+          <button
+            type="button"
+            onClick={() => {
+              const nickname = localStorage.getItem('debate_user_nickname') ?? '';
+              const stance = userStance === 'pro' ? 'PRO' : userStance === 'con' ? 'CON' : '';
+              const surveyUrl = buildSurveyPrefillUrl({ nickname, topicTitle: topicLabel, stance });
+              window.open(surveyUrl, '_blank', 'noopener,noreferrer');
+              onExit();
+            }}
             className="w-full rounded-full bg-stone-900 px-10 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-black sm:w-auto">
             토론 종료
           </button>

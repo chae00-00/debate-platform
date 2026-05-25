@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, X, Search } from 'lucide-react';
-import { buildSurveyPrefillUrl } from '../../config/surveyLinks';
 
 const DEBATE_STORAGE_KEY = 'capstone_debate_session';
 function clearDebateStorage() {
@@ -85,6 +84,10 @@ export default function DebatePage({
   );
   const stage3CycleCount = useMemo(
     () => Math.max(1, logs.filter(l => l.stage === 3 && l.isUser).length),
+    [logs],
+  );
+  const stage5TurnCount = useMemo(
+    () => logs.filter(l => l.stage === 5 && !l.moderator).length,
     [logs],
   );
 
@@ -181,12 +184,16 @@ export default function DebatePage({
       user_role_reversal: 4,
       user_synthesis: 5,
       user_finalize: 5,
+      user_reconceptualization: 5,
       chained_rebuttal_node: 2,
       free_rebuttal_node: 3,
       role_reversal_node: 4,
       synthesis_discuss_node: 5,
+      synthesis_recon_node: 5,
+      synthesis_final_node: 5,
     };
-    const stage = WAITING_TO_STAGE[waitingFor];
+    const stage = WAITING_TO_STAGE[waitingFor]
+      ?? (/synthesis|recon|finali/i.test(waitingFor) ? 5 : null);
     if (stage) setCurrentStage((prev) => Math.max(prev, stage));
   }, [waitingFor]);
 
@@ -245,6 +252,9 @@ export default function DebatePage({
     }
     if (currentStage === 3) {
       return { label: `사이클 ${stage3CycleCount}/${STAGE3_MAX_CYCLES}`, pct: Math.min(stage3CycleCount / STAGE3_MAX_CYCLES, 1) };
+    }
+    if (currentStage === 5 && stage5TurnCount > 0) {
+      return { label: `종합 ${stage5TurnCount}번째`, pct: Math.min(stage5TurnCount / 9, 1) };
     }
     return null;
   };
@@ -465,10 +475,6 @@ export default function DebatePage({
                   const s = JSON.parse(sessionStorage.getItem(DEBATE_STORAGE_KEY));
                   if (s?.sessionId) sessionStorage.setItem('capstone_debate_session_id', s.sessionId);
                 } catch {}
-                const nickname = localStorage.getItem('debate_user_nickname') ?? '';
-                const stance = userStance === 'pro' ? 'PRO' : userStance === 'con' ? 'CON' : '';
-                const surveyUrl = buildSurveyPrefillUrl({ nickname, topicTitle: topicLabel, stance });
-                window.open(surveyUrl, '_blank', 'noopener,noreferrer');
                 clearDebateStorage();
                 onExit();
               }}

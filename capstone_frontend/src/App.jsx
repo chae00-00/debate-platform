@@ -328,6 +328,7 @@ const App = () => {
           onBack={() => navigate('/stats')}
           onExit={handleEndDebate}
           topicLabel={getSelectedTopicLabel()}
+          userStance={userStance ?? ''}
         />
       )}
 
