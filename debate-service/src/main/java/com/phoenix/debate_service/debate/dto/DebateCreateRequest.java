@@ -15,4 +15,5 @@ public class DebateCreateRequest {
     private List<Integer> agentIntensities;
     private String debateFormat;
     private Integer maxCycle;
+    private String mode;  // "debate" | "constructive", 선택 (기본값: constructive)
 }

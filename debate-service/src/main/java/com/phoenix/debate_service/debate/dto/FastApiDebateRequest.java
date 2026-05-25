@@ -24,6 +24,8 @@ public class FastApiDebateRequest {
     @JsonProperty("debate_format")
     private String debateFormat;
 
+    private String mode;  // "debate" | "constructive", 선택
+
     public static FastApiDebateRequest from(DebateCreateRequest request, String topicId) {
         return FastApiDebateRequest.builder()
                 .topic(topicId)
@@ -31,6 +33,7 @@ public class FastApiDebateRequest {
                 .userIntensity(request.getUserIntensity())
                 .agentIntensities(request.getAgentIntensities())
                 .debateFormat(request.getDebateFormat())
+                .mode(request.getMode())
                 .build();
     }
 }
