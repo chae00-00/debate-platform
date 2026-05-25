@@ -42,6 +42,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private User getOrCreateUser(OAuth2UserInfo userInfo) {
         return userRepository.findBySocialIdAndProvider(userInfo.getSocialId(), userInfo.getProvider())
+                .map(user -> {
+                    user.updateProfile(userInfo.getNickname(), userInfo.getProfileImage());
+                    return userRepository.save(user);
+                })
                 .orElseGet(() -> userRepository.save(
                         User.builder()
                                 .socialId(userInfo.getSocialId())

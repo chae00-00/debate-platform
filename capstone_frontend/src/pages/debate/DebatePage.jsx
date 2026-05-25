@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, X, Search } from 'lucide-react';
+import { buildSurveyPrefillUrl } from '../../config/surveyLinks';
 
 const DEBATE_STORAGE_KEY = 'capstone_debate_session';
 function clearDebateStorage() {
@@ -464,6 +465,10 @@ export default function DebatePage({
                   const s = JSON.parse(sessionStorage.getItem(DEBATE_STORAGE_KEY));
                   if (s?.sessionId) sessionStorage.setItem('capstone_debate_session_id', s.sessionId);
                 } catch {}
+                const nickname = localStorage.getItem('debate_user_nickname') ?? '';
+                const stance = userStance === 'pro' ? 'PRO' : userStance === 'con' ? 'CON' : '';
+                const surveyUrl = buildSurveyPrefillUrl({ nickname, topicTitle: topicLabel, stance });
+                window.open(surveyUrl, '_blank', 'noopener,noreferrer');
                 clearDebateStorage();
                 onExit();
               }}
