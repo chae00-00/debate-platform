@@ -57,7 +57,8 @@ const App = () => {
     if (token) {
       localStorage.setItem('debate_token', token);
       try {
-        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
         if (payload.sub) localStorage.setItem('debate_user_id', String(payload.sub));
         if (payload.nickname) localStorage.setItem('debate_user_nickname', String(payload.nickname));
       } catch {}
