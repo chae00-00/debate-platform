@@ -40,6 +40,7 @@ jobs:
             docker-compose down
             sudo journalctl --vacuum-size=50M || true
             sudo apt-get clean -y || true
-            docker-compose up -d --build
+            DOCKER_BUILDKIT=1 docker-compose build
+            docker-compose up -d
             docker image prune -f
             df -h
