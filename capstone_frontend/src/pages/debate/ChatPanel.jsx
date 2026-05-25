@@ -153,6 +153,8 @@ export default function ChatPanel({
   const [isBividStreaming, setIsBividStreaming] = useState(false);
   const prevFetchKey = useRef('');
 
+  const isAgentStreaming = logs.some(l => l.isStreaming);
+
   const phase = STAGE_TO_PHASE[currentStage];
   const opponentId = currentStage === 3 ? (stage3Opponent?.id ?? null) : null;
   const fetchKey = `${sessionId ?? ''}-${phase ?? ''}-${opponentId ?? ''}`;
@@ -171,9 +173,9 @@ export default function ChatPanel({
       .catch((err) => console.error('[ChatPanel] assistant error:', err));
   }, [fetchKey, sessionId, phase, opponentId, currentStage]);
 
-  // isMyTurn이 되고 텍스트가 준비된 순간 한 번만 reveal — 이후 유저 제출해도 유지
+  // isMyTurn이 되고 에이전트 스트리밍이 완전히 끝난 순간 한 번만 reveal
   useEffect(() => {
-    if (isMyTurn && !isTyping && assistantTexts[currentStage]) {
+    if (isMyTurn && !isTyping && !isAgentStreaming && assistantTexts[currentStage]) {
       setRevealedStages((prev) => {
         if (prev.has(currentStage)) return prev;
         const next = new Set(prev);
@@ -263,8 +265,8 @@ export default function ChatPanel({
         })()}
         {/* 타이핑 인디케이터: 토론 종료 후 / 최적해 모달 중 / 5단계 이후 유저 제출 뒤엔 숨김 */}
         {isTyping && !debateComplete && !isFinalize && !(currentStage >= 5 && !isMyTurn) && <TypingIndicator speaker={isTyping} currentStage={currentStage} />}
-        {/* 비비드: 유저가 아직 해당 스테이지 메시지를 안 보냈을 때만 맨 아래 표시 */}
-        {revealedStages.size > 0 && !isTyping && (() => {
+        {/* 비비드: 에이전트 스트리밍 완료 후, 유저가 아직 해당 스테이지 메시지를 안 보냈을 때만 표시 */}
+        {revealedStages.size > 0 && !isTyping && !isAgentStreaming && (() => {
           const latestStage = Math.max(...revealedStages);
           const userAlreadySent = logs.some(l => l.isUser && l.stage === latestStage);
           return !userAlreadySent && assistantTexts[latestStage]

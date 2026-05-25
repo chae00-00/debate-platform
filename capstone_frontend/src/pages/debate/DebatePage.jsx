@@ -74,13 +74,21 @@ export default function DebatePage({
   } = useDebateLogs(debateParams, agentCount, userStance, preparedSessionId);
 
   // logs에서 실시간으로 진행 상황 파악 (useDebateLogs 이후에 선언)
+  const stage1Count = useMemo(
+    () => logs.filter(l => l.stage === 1 && !l.moderator).length,
+    [logs],
+  );
   const stage1SpeakerIdx = useMemo(
-    () => Math.min(logs.filter(l => l.stage === 1 && !l.moderator).length, STAGE1_ORDER.length - 1),
+    () => Math.min(stage1Count, STAGE1_ORDER.length - 1),
+    [stage1Count],
+  );
+  const stage2Count = useMemo(
+    () => logs.filter(l => l.stage === 2 && !l.moderator).length,
     [logs],
   );
   const stage2RoundIdx = useMemo(
-    () => Math.min(logs.filter(l => l.stage === 2 && !l.moderator).length, STAGE2_ROUNDS.length - 1),
-    [logs],
+    () => Math.min(stage2Count, STAGE2_ROUNDS.length - 1),
+    [stage2Count],
   );
   const stage3CycleCount = useMemo(
     () => Math.max(1, logs.filter(l => l.stage === 3 && l.isUser).length),
@@ -243,12 +251,12 @@ export default function DebatePage({
 
   const getProgressInfo = () => {
     if (currentStage === 1) {
-      const done = stage1SpeakerIdx + 1;
-      return { label: `입론 ${done}/${STAGE1_ORDER.length}`, pct: done / STAGE1_ORDER.length };
+      if (stage1Count === 0) return null;
+      return { label: `입론 ${stage1Count}/${STAGE1_ORDER.length}`, pct: stage1Count / STAGE1_ORDER.length };
     }
     if (currentStage === 2) {
-      const round = stage2RoundIdx + 1;
-      return { label: `논박 ${round}/${STAGE2_ROUNDS.length}`, pct: round / STAGE2_ROUNDS.length };
+      if (stage2Count === 0) return null;
+      return { label: `논박 ${stage2Count}/${STAGE2_ROUNDS.length}`, pct: stage2Count / STAGE2_ROUNDS.length };
     }
     if (currentStage === 3) {
       return { label: `사이클 ${stage3CycleCount}/${STAGE3_MAX_CYCLES}`, pct: Math.min(stage3CycleCount / STAGE3_MAX_CYCLES, 1) };
