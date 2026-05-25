@@ -72,12 +72,11 @@ export default function SpeechBubble({ log }) {
     ? '나'
     : compressSpeakerLabel(getSpeakerDisplay());
   const getTargetLabel = () => {
-    if (log.stage === 3) {
-      if (log.targetId === 'user') return '사용자';
-      if (log.targetId === 'agent_1') return '페어 에이전트';
-      return '논박 상대';
+    if (log.stage === 2 || log.stage === 3) {
+      if (log.targetLabel) return log.targetLabel;
+      if (log.targetId === 'user') return '나';
+      return '상대 토론자';
     }
-    if (log.stage === 2) return '상대 토론자';
     return '전체 토론자';
   };
   const avatarTone = isMine

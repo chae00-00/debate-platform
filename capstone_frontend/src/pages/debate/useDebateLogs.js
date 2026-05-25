@@ -116,6 +116,8 @@ function buildLogFromSSE(raw, resolveLabel) {
   const phase = raw.phase ?? 'opening';
   const speakerId = raw.speaker_id ?? raw.speakerId;
   const targetId = raw.target_id ?? raw.targetId ?? null;
+  // stage 1이 끝난 뒤엔 모든 에이전트가 map에 등록돼 있으므로 stance 없이도 resolve 가능
+  const targetLabel = targetId ? resolveLabel(targetId, null) : null;
   return {
     id: raw.turn ?? `entry-${Date.now()}`,
     stage: PHASE_TO_STAGE[phase] ?? 1,
@@ -127,6 +129,7 @@ function buildLogFromSSE(raw, resolveLabel) {
     phase,
     text: raw.content,
     targetId,
+    targetLabel,
   };
 }
 
