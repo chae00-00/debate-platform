@@ -111,13 +111,13 @@ const App = () => {
     return () => { cancelled = true; };
   }, [stage, debateParams]);
 
-  const resetParams = () => {
+  const resetParams = (resetMode = false) => {
     if (debateEnterTimeoutRef.current) {
       window.clearTimeout(debateEnterTimeoutRef.current);
       debateEnterTimeoutRef.current = null;
     }
     setStage(0);
-    setDebateMode('constructive');
+    if (resetMode) setDebateMode('constructive');
     setUserStance(null);
     setAgentCount(1);
     setAiStances({ pro: [3, 3, 3], con: [3, 3, 3] });
@@ -140,7 +140,7 @@ const App = () => {
   const handleClose = () => {
     setActiveTopic(null);
     setSelectedSubTopics([]);
-    resetParams();
+    resetParams(true);  // 완전히 닫을 때만 debateMode 리셋
   };
 
   const handleEndDebate = () => {
