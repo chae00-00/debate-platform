@@ -458,6 +458,7 @@ export default function DebatePage({
               progress={progress}
               isTyping={isTyping}
               isMyTurn={isMyTurn}
+              debateMode={debateMode}
             />
             <AnalysisPanel
               showLiveAnalysis={showLiveAnalysis}

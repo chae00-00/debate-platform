@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ChevronRight, Users, Mic } from 'lucide-react';
 import { STAGES } from './mockData';
 
@@ -10,12 +11,19 @@ export default function StepperPanel({
   progress,
   isTyping,
   isMyTurn,
+  debateMode = 'constructive',
 }) {
+  // 일반 토론(general)에서는 역할반전(4), 종합(5) 제외
+  const visibleStages = useMemo(
+    () => debateMode === 'general' ? STAGES.filter((s) => s.id <= 3) : STAGES,
+    [debateMode],
+  );
+
   return (
     <section className="rounded-[32px] border border-white/80 bg-white/60 px-5 py-4 backdrop-blur-md shadow-[0_12px_32px_rgba(0,0,0,0.04)] flex flex-col gap-2">
       {/* 단계 스테퍼 */}
       <div className="flex items-center gap-0.5 overflow-x-auto hide-scrollbar">
-        {STAGES.map((stage, i) => {
+        {visibleStages.map((stage, i) => {
           const isDone    = currentStage > stage.id;   // 완료된 단계
           const isActive  = viewStage === stage.id;    // 현재 보고 있는 단계
           const isFuture  = stage.id > currentStage;   // 아직 미진행 단계
@@ -34,7 +42,7 @@ export default function StepperPanel({
               >
                 {stage.label}
               </button>
-              {i < STAGES.length - 1 && (
+              {i < visibleStages.length - 1 && (
                 <div className="mx-1 flex items-center justify-center shrink-0">
                   <ChevronRight size={13} className="text-stone-500/70" strokeWidth={2.4} />
                 </div>
