@@ -146,6 +146,7 @@ export default function ChatPanel({
   stage3Opponent,
   sessionId,
   topicLabel = '',
+  debateMode = 'constructive',
 }) {
   const scrollRef = useRef(null);
   const [assistantTexts, setAssistantTexts] = useState({});
@@ -163,6 +164,8 @@ export default function ChatPanel({
     console.log('[ChatPanel] fetchKey:', fetchKey, 'sessionId:', sessionId, 'stage:', currentStage);
     if (!sessionId || !phase) return;
     if (prevFetchKey.current === fetchKey) return;
+    // debate 모드에서는 role_reversal(4), synthesis(5) 안내 API 호출 안함 (400 에러 방지)
+    if (debateMode === 'general' && (currentStage === 4 || currentStage === 5)) return;
     prevFetchKey.current = fetchKey;
 
     getAssistantGuide(sessionId, phase, opponentId)
@@ -171,7 +174,7 @@ export default function ChatPanel({
         setAssistantTexts((prev) => ({ ...prev, [currentStage]: res.text ?? '' }));
       })
       .catch((err) => console.error('[ChatPanel] assistant error:', err));
-  }, [fetchKey, sessionId, phase, opponentId, currentStage]);
+  }, [fetchKey, sessionId, phase, opponentId, currentStage, debateMode]);
 
   // isMyTurn이 되고 에이전트 스트리밍이 완전히 끝난 순간 한 번만 reveal
   useEffect(() => {

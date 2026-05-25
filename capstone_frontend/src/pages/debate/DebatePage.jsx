@@ -440,6 +440,7 @@ export default function DebatePage({
               stage3Opponent={stage3Opponent}
               sessionId={sessionId}
               topicLabel={topicLabel}
+              debateMode={debateMode}
             />
           </div>
 
