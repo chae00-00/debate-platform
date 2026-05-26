@@ -109,7 +109,7 @@ function PentagonRadar({ before, after, size = 300 }) {
 }
 
 // 단일 진영 레이더 카드 (찬성 또는 반대)
-function SideRadarCard({ before, after, label, color, delta }) {
+function SideRadarCard({ before, after, label, color, delta, avgBefore, avgAfter }) {
   const bestKey = METRICS.reduce((best, m) => {
     const d = (after[m.key] ?? 0) - (before[m.key] ?? 0);
     const bestDelta = (after[best] ?? 0) - (before[best] ?? 0);
@@ -117,19 +117,33 @@ function SideRadarCard({ before, after, label, color, delta }) {
   }, METRICS[0].key);
 
   const colorClass = color === 'blue'
-    ? { bg: 'bg-blue-500', text: 'text-blue-500', light: 'text-blue-100', border: 'border-blue-200' }
-    : { bg: 'bg-red-400', text: 'text-red-400', light: 'text-red-100', border: 'border-red-200' };
+    ? { bg: 'bg-blue-500', text: 'text-blue-500', light: 'text-blue-100', border: 'border-blue-200', gradient: 'from-blue-500 to-blue-400' }
+    : { bg: 'bg-red-400', text: 'text-red-400', light: 'text-red-100', border: 'border-red-200', gradient: 'from-red-400 to-red-300' };
 
   return (
     <div className={`flex-1 rounded-[28px] border ${colorClass.border} bg-white/90 px-5 py-5 shadow-[0_16px_40px_rgba(0,0,0,0.06)]`}>
-      {/* 헤더 */}
-      <div className="mb-3 flex items-center justify-between">
-        <span className={`text-[18px] font-black ${colorClass.text}`}>{label} 이해도</span>
-        {delta !== null && (
-          <span className={`text-[14px] font-bold ${delta > 0 ? 'text-emerald-500' : delta < 0 ? 'text-rose-400' : 'text-stone-400'}`}>
-            {delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}점
-          </span>
-        )}
+      {/* 헤더 + 종합 점수 */}
+      <div className={`rounded-[16px] bg-gradient-to-r ${colorClass.gradient} px-5 py-4 mb-4`}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[18px] font-black text-white">{label} 이해도</span>
+          {delta !== null && (
+            <span className={`text-[14px] font-bold px-2 py-0.5 rounded-full ${delta > 0 ? 'bg-emerald-400 text-white' : delta < 0 ? 'bg-rose-500 text-white' : 'bg-white/30 text-white'}`}>
+              {delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}점
+            </span>
+          )}
+        </div>
+        {/* 종합 점수 크게 */}
+        <div className="flex items-center justify-center gap-4">
+          <div className="text-center">
+            <p className="text-[12px] font-bold text-white/70">사전</p>
+            <p className="text-[28px] font-black text-white/80">{avgBefore}</p>
+          </div>
+          <span className="text-[24px] font-bold text-white/60">→</span>
+          <div className="text-center">
+            <p className="text-[12px] font-bold text-white/70">사후</p>
+            <p className="text-[36px] font-black text-white">{avgAfter}</p>
+          </div>
+        </div>
       </div>
       {/* 범례 */}
       <div className="mb-2 flex items-center justify-center gap-4 text-[13px] font-bold text-stone-600">
@@ -142,7 +156,7 @@ function SideRadarCard({ before, after, label, color, delta }) {
       </div>
       {/* 레이더 */}
       <div className="flex justify-center">
-        <PentagonRadar before={before} after={after} size={280} />
+        <PentagonRadar before={before} after={after} size={260} />
       </div>
       {/* 지표 리스트 */}
       <div className="mt-3 border-t border-stone-100 pt-3 space-y-2">
@@ -165,11 +179,11 @@ function SideRadarCard({ before, after, label, color, delta }) {
 }
 
 // 좌우 분리 레이더 카드 (찬성 | 반대)
-function DualRadarCard({ proBefore, proAfter, conBefore, conAfter, proDelta, conDelta }) {
+function DualRadarCard({ proBefore, proAfter, conBefore, conAfter, proDelta, conDelta, proAvgBefore, proAvgAfter, conAvgBefore, conAvgAfter }) {
   return (
     <div className="mb-5 grid grid-cols-1 md:grid-cols-2 gap-5">
-      <SideRadarCard before={proBefore} after={proAfter} label="찬성" color="blue" delta={proDelta} />
-      <SideRadarCard before={conBefore} after={conAfter} label="반대" color="red" delta={conDelta} />
+      <SideRadarCard before={proBefore} after={proAfter} label="찬성" color="blue" delta={proDelta} avgBefore={proAvgBefore} avgAfter={proAvgAfter} />
+      <SideRadarCard before={conBefore} after={conAfter} label="반대" color="red" delta={conDelta} avgBefore={conAvgBefore} avgAfter={conAvgAfter} />
     </div>
   );
 }
@@ -235,26 +249,22 @@ export default function PostDebateStats({ onBack = () => {}, onNext = () => {} }
   const proBefore = evalData ? phaseToScores(evalData.pro?.pre) ?? MOCK_SCORES.before : MOCK_SCORES.before;
   const proAfter  = evalData ? phaseToScores(evalData.pro?.post) ?? MOCK_SCORES.after : MOCK_SCORES.after;
   const proDelta  = evalData?.pro?.delta_100 ?? null;
+  const proAvgBefore = evalData ? Math.round(evalData.pro?.pre?.average_100 ?? 0) : 32;
+  const proAvgAfter  = evalData ? Math.round(evalData.pro?.post?.average_100 ?? 0) : 72;
 
   // 반대 이해도 (전/후)
   const conBefore = evalData ? phaseToScores(evalData.con?.pre) ?? MOCK_SCORES.before : MOCK_SCORES.before;
   const conAfter  = evalData ? phaseToScores(evalData.con?.post) ?? MOCK_SCORES.after : MOCK_SCORES.after;
   const conDelta  = evalData?.con?.delta_100 ?? null;
+  const conAvgBefore = evalData ? Math.round(evalData.con?.pre?.average_100 ?? 0) : 28;
+  const conAvgAfter  = evalData ? Math.round(evalData.con?.post?.average_100 ?? 0) : 64;
 
-  // 종합 점수 (찬반 평균)
-  const scoreBefore = evalData
-    ? Math.round(((evalData.pro?.pre?.average_100 ?? 0) + (evalData.con?.pre?.average_100 ?? 0)) / 2)
-    : Math.round((Object.values(MOCK_SCORES.before).reduce((a, b) => a + b, 0) / (METRICS.length * 5)) * 100);
-
-  const scoreAfter = evalData
-    ? Math.round(((evalData.pro?.post?.average_100 ?? 0) + (evalData.con?.post?.average_100 ?? 0)) / 2)
-    : Math.round((Object.values(MOCK_SCORES.after).reduce((a, b) => a + b, 0) / (METRICS.length * 5)) * 100);
-
-  const totalDelta = scoreAfter - scoreBefore;
+  // 전체 변화량 (verdict용)
+  const totalDelta = (proDelta ?? 0) + (conDelta ?? 0);
 
   const verdict =
-    totalDelta >= 20 ? '논증 역량이 크게 성장했어요.' :
-    totalDelta >= 10 ? '토론을 통해 역량이 향상됐어요.' :
+    totalDelta >= 30 ? '양측 입장 이해도가 크게 성장했어요!' :
+    totalDelta >= 15 ? '토론을 통해 이해도가 향상됐어요.' :
     totalDelta > 0   ? '조금씩 성장하고 있어요.' :
     totalDelta === 0 ? '점수 변화는 없었지만, 토론 경험이 쌓였어요.' :
                        '이번 결과를 발판 삼아 다시 도전해보세요.';
@@ -298,27 +308,14 @@ export default function PostDebateStats({ onBack = () => {}, onNext = () => {} }
           )}
         </div>
 
-        <div className="mb-5 rounded-[36px] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,245,244,0.94))] px-7 py-8 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
-          <p className="mb-1 text-center text-[22px] font-extrabold tracking-tight text-stone-900">종합 점수</p>
-          {loading || !evalData ? (
-            <p className="py-10 text-center text-[15px] font-bold text-stone-400 animate-pulse">계산중입니다...</p>
-          ) : (
-            <>
-              <p className="mb-6 text-center text-[18px] font-bold text-stone-700">{verdict}</p>
-              <div className="flex items-center justify-around gap-6">
-                <SingleGauge score={scoreBefore} label="사전" isGray />
-                <div className="flex flex-col items-center gap-2">
-                  <div className={`flex items-center ${totalDelta > 0 ? 'text-emerald-500' : totalDelta < 0 ? 'text-rose-400' : 'text-stone-400'}`}>
-                    <ChevronRight size={52} strokeWidth={3} />
-                    <ChevronRight size={52} strokeWidth={3} className="-ml-8" />
-                  </div>
-                </div>
-                <SingleGauge score={scoreAfter} label="사후" />
-              </div>
-            </>
-          )}
-        </div>
+        {/* 한줄 verdict */}
+        {!loading && evalData && (
+          <div className="mb-5 rounded-[20px] bg-stone-800 px-6 py-4 text-center shadow-lg">
+            <p className="text-[18px] font-bold text-white">{verdict}</p>
+          </div>
+        )}
 
+        {/* 찬반 분리 카드 */}
         {loading || !evalData ? (
           <div className="mb-5 rounded-[36px] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,245,244,0.94))] px-7 py-8 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
             <p className="py-10 text-center text-[15px] font-bold text-stone-400 animate-pulse">계산중입니다...</p>
@@ -327,6 +324,8 @@ export default function PostDebateStats({ onBack = () => {}, onNext = () => {} }
           <DualRadarCard
             proBefore={proBefore} proAfter={proAfter} proDelta={proDelta}
             conBefore={conBefore} conAfter={conAfter} conDelta={conDelta}
+            proAvgBefore={proAvgBefore} proAvgAfter={proAvgAfter}
+            conAvgBefore={conAvgBefore} conAvgAfter={conAvgAfter}
           />
         )}
 
