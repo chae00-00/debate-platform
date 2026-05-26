@@ -629,7 +629,9 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
           <button
             type="button"
             onClick={() => {
-              const surveyUrl = getSurveyUrl({ debateMode, timing: 'post' });
+              const nickname = localStorage.getItem('debate_user_nickname') ?? '';
+              const stance = userStance === 'pro' ? 'PRO' : userStance === 'con' ? 'CON' : userStance?.toUpperCase?.() ?? '';
+              const surveyUrl = getSurveyUrl({ debateMode, timing: 'post', nickname, topic: topicLabel, stance });
               window.open(surveyUrl, '_blank', 'noopener,noreferrer');
               onExit();
             }}
