@@ -466,6 +466,12 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
             const wf = raw.waiting_for ?? raw.waitingFor ?? null;
             const finished = raw.is_finished ?? raw.isFinished ?? false;
             const draft = raw.synthesis_draft ?? raw.synthesisDraft ?? null;
+            // 일반 토론: 백엔드가 is_finished를 보내거나, fallback으로 role_reversal 진입 시 종료
+            if (debateMode === 'general' && (wf === 'role_reversal_node' || wf === 'user_role_reversal')) {
+              ctrl.abort();
+              setDebateComplete(true);
+              return;
+            }
             setWaitingFor(wf);
             if (finished) {
               if (draft) setSynthesisDraft(draft);
@@ -642,6 +648,11 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
             const wf = raw.waiting_for ?? raw.waitingFor ?? null;
             const finished = raw.is_finished ?? raw.isFinished ?? false;
             const draft = raw.synthesis_draft ?? raw.synthesisDraft ?? null;
+            // 일반 토론: 백엔드가 is_finished를 보내거나, fallback으로 role_reversal 진입 시 종료
+            if (debateMode === 'general' && (wf === 'role_reversal_node' || wf === 'user_role_reversal')) {
+              setDebateComplete(true);
+              return;
+            }
             setWaitingFor(wf);
             if (finished) {
               if (draft) setSynthesisDraft(draft);
