@@ -510,6 +510,31 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
           <h2 className="text-[42px] font-black tracking-tight text-stone-800">최종 결과</h2>
         </div>
 
+        {/* ── Row 1: 최종 승자 (일반 토론만 표시) ── */}
+        {debateMode === 'general' && (
+          <div className={`rounded-[36px] border border-white/80 px-8 py-8 shadow-[0_24px_60px_rgba(0,0,0,0.10)] ${
+            evalLoading || !evalData
+              ? 'bg-white/80'
+              : finalIsPro
+                ? 'bg-[linear-gradient(145deg,rgba(219,234,254,0.9),rgba(255,255,255,0.96))]'
+                : 'bg-[linear-gradient(145deg,rgba(254,226,226,0.9),rgba(255,255,255,0.96))]'
+          }`}>
+            {evalLoading || !evalData ? <Calculating /> : (
+              <>
+                <div className="flex flex-col items-center gap-3">
+                  <p className="text-[42px] font-black tracking-tight text-stone-900">
+                    {finalIsPro ? '찬성 측 승리' : '반대 측 승리'}
+                  </p>
+                  <p className="text-[15px] font-semibold text-stone-500 text-center max-w-2xl leading-relaxed">
+                    {winnerComment}
+                  </p>
+                </div>
+                <ConflictBar proPct={finalProPct} conPct={finalConPct} />
+              </>
+            )}
+          </div>
+        )}
+
         {/* ── Row 2: 능력치 분석(2fr) + 타임라인(3fr) ── */}
         <div className="grid gap-6 lg:grid-cols-[2fr_3fr]">
 
