@@ -1,7 +1,7 @@
 import { ExternalLink, ChevronRight } from 'lucide-react';
-import { buildSurveyPrefillUrl } from '../config/surveyLinks';
+import { getSurveyUrl } from '../config/surveyLinks';
 
-const PreSurvey = ({ visible, topicId, activeData, selectedSubTopics = [], userStance, onComplete }) => {
+const PreSurvey = ({ visible, topicId, activeData, selectedSubTopics = [], userStance, debateMode = 'constructive', onComplete }) => {
   const selected = selectedSubTopics[0];
   const selectedTitle = selected?.title ?? selected;
   const selectedSubTopic = selected?.title
@@ -10,9 +10,7 @@ const PreSurvey = ({ visible, topicId, activeData, selectedSubTopics = [], userS
   const topicLabel = selectedSubTopic?.title ?? selectedTitle ?? activeData?.title ?? '주제 미선택';
 
   const handleOpenForm = () => {
-    const nickname = localStorage.getItem('debate_user_nickname') ?? '';
-    const stance = userStance === 'pro' ? 'PRO' : userStance === 'con' ? 'CON' : '';
-    const url = buildSurveyPrefillUrl({ nickname, topicTitle: topicLabel, stance });
+    const url = getSurveyUrl({ debateMode, timing: 'pre' });
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 

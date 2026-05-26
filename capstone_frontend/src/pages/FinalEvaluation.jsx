@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Star, User, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import BackgroundBubbles from '../components/BackgroundBubbles';
-import { buildSurveyPrefillUrl } from '../config/surveyLinks';
+import { getSurveyUrl } from '../config/surveyLinks';
 
 // Material Symbols 아이콘 컴포넌트
 function MIcon({ name, size = 20, fill = 0, weight = 400, className = '' }) {
@@ -629,9 +629,7 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
           <button
             type="button"
             onClick={() => {
-              const nickname = localStorage.getItem('debate_user_nickname') ?? '';
-              const stance = userStance === 'pro' ? 'PRO' : userStance === 'con' ? 'CON' : '';
-              const surveyUrl = buildSurveyPrefillUrl({ nickname, topicTitle: topicLabel, stance });
+              const surveyUrl = getSurveyUrl({ debateMode, timing: 'post' });
               window.open(surveyUrl, '_blank', 'noopener,noreferrer');
               onExit();
             }}

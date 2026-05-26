@@ -1,10 +1,14 @@
-const FORM_BASE = 'https://docs.google.com/forms/d/1luwzbqHTfWLXWSCIb4CFE4AHdXOxsKWtng1q4dbGano/viewform';
+const SURVEY_URLS = {
+  general: {
+    pre:  'https://forms.gle/KMW5m2gd7X7iFtDc7',
+    post: 'https://forms.gle/ti45LeKCUFZCuJnZ7',
+  },
+  constructive: {
+    pre:  'https://forms.gle/sZBYZyEWGq4PSYMP9',
+    post: 'https://forms.gle/xw6C7oeUhf5J6z9b9',
+  },
+};
 
-export const buildSurveyPrefillUrl = ({ nickname = '', topicTitle = '', stance = '' } = {}) => {
-  const params = new URLSearchParams();
-  if (nickname) params.set('entry.458874043', nickname);
-  if (topicTitle) params.set('entry.797411540', topicTitle);
-  if (stance) params.set('entry.62340958', stance);
-  const qs = params.toString();
-  return qs ? `${FORM_BASE}?${qs}` : FORM_BASE;
+export const getSurveyUrl = ({ debateMode = 'constructive', timing = 'pre' } = {}) => {
+  return SURVEY_URLS[debateMode]?.[timing] ?? SURVEY_URLS.constructive[timing];
 };

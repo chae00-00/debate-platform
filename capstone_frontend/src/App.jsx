@@ -399,6 +399,7 @@ const App = () => {
             activeData={activeData}
             selectedSubTopics={selectedSubTopics}
             userStance={userStance}
+            debateMode={debateMode}
             visible={stage === 2}
             onComplete={() => setStage(3)}
           />
