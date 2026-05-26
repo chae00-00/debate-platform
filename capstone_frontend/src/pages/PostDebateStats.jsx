@@ -25,17 +25,6 @@ function phaseToScores(phase) {
   return result;
 }
 
-// pro/con 점수 평균
-function avgScores(a, b) {
-  if (!a && !b) return null;
-  if (!a) return b;
-  if (!b) return a;
-  const result = {};
-  for (const m of METRICS) {
-    result[m.key] = Math.round((a[m.key] + b[m.key]) / 2);
-  }
-  return result;
-}
 
 // ─── 오각형 레이더 차트 ───────────────────────────────────────────────────────
 function PentagonRadar({ before, after, size = 300 }) {
@@ -119,51 +108,68 @@ function PentagonRadar({ before, after, size = 300 }) {
   );
 }
 
-function RadarCard({ before, after }) {
+// 단일 진영 레이더 카드 (찬성 또는 반대)
+function SideRadarCard({ before, after, label, color, delta }) {
   const bestKey = METRICS.reduce((best, m) => {
-    const delta = (after[m.key] ?? 0) - (before[m.key] ?? 0);
+    const d = (after[m.key] ?? 0) - (before[m.key] ?? 0);
     const bestDelta = (after[best] ?? 0) - (before[best] ?? 0);
-    return delta > bestDelta ? m.key : best;
+    return d > bestDelta ? m.key : best;
   }, METRICS[0].key);
 
+  const colorClass = color === 'blue'
+    ? { bg: 'bg-blue-500', text: 'text-blue-500', light: 'text-blue-100', border: 'border-blue-200' }
+    : { bg: 'bg-red-400', text: 'text-red-400', light: 'text-red-100', border: 'border-red-200' };
+
   return (
-    <div className="mb-5 rounded-[36px] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,245,244,0.94))] px-7 py-2 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
-      <div className="mb-1 flex items-center justify-end">
-        <div className="flex items-center gap-5 text-base font-bold text-stone-700">
-          <span className="flex items-center gap-2">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-slate-400" />사전
+    <div className={`flex-1 rounded-[28px] border ${colorClass.border} bg-white/90 px-5 py-5 shadow-[0_16px_40px_rgba(0,0,0,0.06)]`}>
+      {/* 헤더 */}
+      <div className="mb-3 flex items-center justify-between">
+        <span className={`text-[18px] font-black ${colorClass.text}`}>{label} 이해도</span>
+        {delta !== null && (
+          <span className={`text-[14px] font-bold ${delta > 0 ? 'text-emerald-500' : delta < 0 ? 'text-rose-400' : 'text-stone-400'}`}>
+            {delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}점
           </span>
-          <span className="flex items-center gap-2">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-indigo-400" />사후
-          </span>
-        </div>
+        )}
       </div>
-      <div className="flex justify-center py-0">
-        <PentagonRadar before={before} after={after} size={420} />
+      {/* 범례 */}
+      <div className="mb-2 flex items-center justify-center gap-4 text-[13px] font-bold text-stone-600">
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-2 w-2 rounded-full bg-slate-400" />사전
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-2 w-2 rounded-full bg-indigo-400" />사후
+        </span>
       </div>
-      <div className="mt-0 border-t border-stone-100 pt-2 space-y-3">
+      {/* 레이더 */}
+      <div className="flex justify-center">
+        <PentagonRadar before={before} after={after} size={280} />
+      </div>
+      {/* 지표 리스트 */}
+      <div className="mt-3 border-t border-stone-100 pt-3 space-y-2">
         {METRICS.map((m) => {
           const isBest = m.key === bestKey && ((after[m.key] ?? 0) - (before[m.key] ?? 0)) > 0;
           return (
-            <div key={m.key} className={`flex items-center justify-between rounded-[14px] px-4 py-4 -mx-3 ${isBest ? 'bg-emerald-500' : 'bg-stone-50'}`}>
-              <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`text-[17px] ${isBest ? 'text-white' : 'text-stone-700'}`}>
-                    <span className="font-extrabold">{m.label}</span>
-                    <span className={`font-medium ${isBest ? 'text-emerald-100' : 'text-stone-500'}`}> : {m.desc}</span>
-                  </span>
-                  {isBest && <span className="text-[12px] font-bold text-emerald-100">가장 많이 성장</span>}
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0 ml-4">
-                <span className={`text-[16px] font-extrabold ${isBest ? 'text-emerald-100' : 'text-stone-500'}`}>{before[m.key]}</span>
-                <span className={`text-[15px] font-extrabold ${isBest ? 'text-white/60' : 'text-stone-400'}`}>→</span>
-                <span className={`text-[22px] font-black ${isBest ? 'text-white' : 'text-indigo-500'}`}>{after[m.key]}</span>
+            <div key={m.key} className={`flex items-center justify-between rounded-[10px] px-3 py-2 ${isBest ? 'bg-emerald-500' : 'bg-stone-50'}`}>
+              <span className={`text-[14px] font-bold ${isBest ? 'text-white' : 'text-stone-700'}`}>{m.label}</span>
+              <div className="flex items-center gap-1.5">
+                <span className={`text-[13px] font-bold ${isBest ? 'text-emerald-100' : 'text-stone-400'}`}>{before[m.key]}</span>
+                <span className={`text-[12px] ${isBest ? 'text-white/60' : 'text-stone-300'}`}>→</span>
+                <span className={`text-[16px] font-black ${isBest ? 'text-white' : 'text-indigo-500'}`}>{after[m.key]}</span>
               </div>
             </div>
           );
         })}
       </div>
+    </div>
+  );
+}
+
+// 좌우 분리 레이더 카드 (찬성 | 반대)
+function DualRadarCard({ proBefore, proAfter, conBefore, conAfter, proDelta, conDelta }) {
+  return (
+    <div className="mb-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+      <SideRadarCard before={proBefore} after={proAfter} label="찬성" color="blue" delta={proDelta} />
+      <SideRadarCard before={conBefore} after={conAfter} label="반대" color="red" delta={conDelta} />
     </div>
   );
 }
@@ -225,14 +231,17 @@ export default function PostDebateStats({ onBack = () => {}, onNext = () => {} }
       .finally(() => setLoading(false));
   }, []);
 
-  const before = evalData
-    ? avgScores(phaseToScores(evalData.pro?.pre), phaseToScores(evalData.con?.pre)) ?? MOCK_SCORES.before
-    : MOCK_SCORES.before;
+  // 찬성 이해도 (전/후)
+  const proBefore = evalData ? phaseToScores(evalData.pro?.pre) ?? MOCK_SCORES.before : MOCK_SCORES.before;
+  const proAfter  = evalData ? phaseToScores(evalData.pro?.post) ?? MOCK_SCORES.after : MOCK_SCORES.after;
+  const proDelta  = evalData?.pro?.delta_100 ?? null;
 
-  const after = evalData
-    ? avgScores(phaseToScores(evalData.pro?.post), phaseToScores(evalData.con?.post)) ?? MOCK_SCORES.after
-    : MOCK_SCORES.after;
+  // 반대 이해도 (전/후)
+  const conBefore = evalData ? phaseToScores(evalData.con?.pre) ?? MOCK_SCORES.before : MOCK_SCORES.before;
+  const conAfter  = evalData ? phaseToScores(evalData.con?.post) ?? MOCK_SCORES.after : MOCK_SCORES.after;
+  const conDelta  = evalData?.con?.delta_100 ?? null;
 
+  // 종합 점수 (찬반 평균)
   const scoreBefore = evalData
     ? Math.round(((evalData.pro?.pre?.average_100 ?? 0) + (evalData.con?.pre?.average_100 ?? 0)) / 2)
     : Math.round((Object.values(MOCK_SCORES.before).reduce((a, b) => a + b, 0) / (METRICS.length * 5)) * 100);
@@ -315,7 +324,10 @@ export default function PostDebateStats({ onBack = () => {}, onNext = () => {} }
             <p className="py-10 text-center text-[15px] font-bold text-stone-400 animate-pulse">계산중입니다...</p>
           </div>
         ) : (
-          <RadarCard before={before} after={after} />
+          <DualRadarCard
+            proBefore={proBefore} proAfter={proAfter} proDelta={proDelta}
+            conBefore={conBefore} conAfter={conAfter} conDelta={conDelta}
+          />
         )}
 
         <div className="mt-6 flex w-full justify-end rounded-[28px] border border-white/80 bg-white/80 px-5 py-3.5 backdrop-blur-md shadow-[0_16px_32px_rgba(0,0,0,0.08)]">
