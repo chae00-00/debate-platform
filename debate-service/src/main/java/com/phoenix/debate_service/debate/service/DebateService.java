@@ -135,9 +135,22 @@ public class DebateService {
             log.info("[prepare] 세션 준비 완료: {}", fastApiSessionId);
             return new PrepareResponse(fastApiSessionId);
         } catch (TimeoutException e) {
-            throw new RuntimeException("FastAPI 세션 초기화 타임아웃 (" + PREPARE_SESSION_TIMEOUT_SECONDS + "s)");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "FastAPI 세션 초기화 타임아웃 (" + PREPARE_SESSION_TIMEOUT_SECONDS + "s)"
+            );
         } catch (Exception e) {
-            throw new RuntimeException("FastAPI 세션 초기화 실패: " + e.getMessage());
+            Throwable cause = e instanceof ExecutionException && e.getCause() != null ? e.getCause() : e;
+            if (cause instanceof WebClientResponseException webClientError) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_GATEWAY,
+                        "FastAPI 오류: " + webClientError.getStatusCode()
+                );
+            }
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "FastAPI 세션 초기화 실패: " + cause.getMessage()
+            );
         }
     }
 

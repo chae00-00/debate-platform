@@ -9,6 +9,18 @@ export const apiFetch = async (path, options = {}) => {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   });
-  if (!res.ok) throw new Error(`API error ${res.status}: ${path}`);
+  if (!res.ok) {
+    let detail = '';
+    try {
+      const body = await res.json();
+      detail = body?.message ? ` - ${body.message}` : '';
+    } catch {
+      try {
+        const text = await res.text();
+        detail = text ? ` - ${text}` : '';
+      } catch {}
+    }
+    throw new Error(`API error ${res.status}: ${path}${detail}`);
+  }
   return res.json();
 };

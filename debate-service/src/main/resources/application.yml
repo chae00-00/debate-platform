@@ -58,4 +58,4 @@ app:
     redirect-uri: ${OAUTH_REDIRECT_URI:http://localhost:5173/oauth/callback}
 
 fastapi:
-  url: ${FASTAPI_URL:https://calm-qualifications-disks-marine.trycloudflare.com}
+  url: ${FASTAPI_URL:https://shots-charms-sue-meal.trycloudflare.com}

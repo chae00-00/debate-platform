@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 
@@ -53,6 +54,21 @@ public class GlobalExceptionHandler {
                 Instant.now()
         );
         return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleResponseStatusException(
+            ResponseStatusException e,
+            HttpServletRequest request
+    ) {
+        HttpStatusCode statusCode = e.getStatusCode();
+        ApiErrorResponse body = new ApiErrorResponse(
+                statusCode.value(),
+                e.getReason() != null ? e.getReason() : e.getMessage(),
+                request.getRequestURI(),
+                Instant.now()
+        );
+        return ResponseEntity.status(statusCode).body(body);
     }
 
     @ExceptionHandler(RuntimeException.class)
