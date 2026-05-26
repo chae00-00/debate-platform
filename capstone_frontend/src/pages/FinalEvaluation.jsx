@@ -426,12 +426,13 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
   const proAvg = evalData ? Math.round(evalData.pro?.post?.average_100 ?? 0) : null;
   const conAvg = evalData ? Math.round(evalData.con?.post?.average_100 ?? 0) : null;
 
-  // 승자 결정 (평가 있으면 평균으로, 없으면 mock)
-  const finalProPct = evalData && proAvg !== null && conAvg !== null && (proAvg + conAvg) > 0
+  // 승자 결정 (평가 있으면 원점수 직접 비교, 없으면 mock)
+  const hasScores = evalData && proAvg !== null && conAvg !== null && (proAvg + conAvg) > 0;
+  const finalProPct = hasScores
     ? Math.round((proAvg / (proAvg + conAvg)) * 100)
     : FINAL_PRO_PCT;
   const finalConPct = 100 - finalProPct;
-  const finalIsPro  = finalProPct >= 50;
+  const finalIsPro  = hasScores ? proAvg >= conAvg : finalProPct >= 50;
   const winnerComment = evalData
     ? (finalIsPro
         ? `찬성 측이 ${proAvg}점으로 반대 측(${conAvg}점)보다 높은 논증력을 보였습니다.`
