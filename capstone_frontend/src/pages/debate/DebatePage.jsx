@@ -465,12 +465,14 @@ export default function DebatePage({
               analysis={analysis}
               speakerLabel={speakerLabel}
             />
-            <ConflictBarPanel
-              currentStage={currentStage}
-              isDebateComplete={debateComplete}
-              liveProPercent={liveAnalysis?.proPercent ?? null}
-              liveConPercent={liveAnalysis?.conPercent ?? null}
-            />
+            {debateMode === 'general' && (
+              <ConflictBarPanel
+                currentStage={currentStage}
+                isDebateComplete={debateComplete}
+                liveProPercent={liveAnalysis?.proPercent ?? null}
+                liveConPercent={liveAnalysis?.conPercent ?? null}
+              />
+            )}
           </aside>
 
         </div>

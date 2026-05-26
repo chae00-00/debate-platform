@@ -333,6 +333,7 @@ const App = () => {
           onExit={handleEndDebate}
           topicLabel={getSelectedTopicLabel()}
           userStance={userStance ?? ''}
+          debateMode={debateMode}
         />
       )}
 

@@ -385,7 +385,7 @@ function mapToTriMetrics(phase) {
 }
 
 // ─── 메인 페이지 ─────────────────────────────────────────────────────────────
-export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, topicLabel = '토론 최종 평가', userStance = '' }) {
+export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, topicLabel = '토론 최종 평가', userStance = '', debateMode = 'constructive' }) {
   const [evalData, setEvalData]     = useState(null);
   const [swingTurns, setSwingTurns] = useState(null);
   const [evalLoading, setEvalLoading]   = useState(true);
@@ -541,8 +541,8 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
           </div>
         </div>
 
-        {/* ── Row 3: MVP (full width, 가로 바) ── */}
-        <div className={`rounded-[36px] border border-white/80 px-8 py-6 shadow-[0_24px_60px_rgba(0,0,0,0.10)] ${
+        {/* ── Row 3: MVP (full width, 가로 바) — 일반 토론(general)만 표시 ── */}
+        {debateMode === 'general' && <div className={`rounded-[36px] border border-white/80 px-8 py-6 shadow-[0_24px_60px_rgba(0,0,0,0.10)] ${
           evalLoading || !evalData
             ? 'bg-white/80'
             : mvpSide === 'pro'
@@ -581,7 +581,7 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
               </div>
             </div>
           )}
-        </div>
+        </div>}
 
         {/* ── Row 4: AI 코치 피드백 (3열) ── */}
         <div>
