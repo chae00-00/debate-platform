@@ -51,7 +51,7 @@ const ACTION_BUBBLES = [
   },
 ];
 
-const HomeLanding = ({ onCreateDebate, onLogin, onGuide }) => {
+const HomeLanding = ({ onCreateDebate, onLogin, onGuide, nickname }) => {
   const [hoveredBubble, setHoveredBubble] = useState(null);
 
   const handleBubbleClick = (key) => {
@@ -64,7 +64,7 @@ const HomeLanding = ({ onCreateDebate, onLogin, onGuide }) => {
       <div className="mx-auto flex min-h-screen w-full items-start justify-center pt-6 md:items-center md:pt-0">
         <FixedStage baseWidth={1440} baseHeight={860}>
           <div className="relative h-[860px] w-[1440px]">
-            <TopHeader onGuide={onGuide} onLogin={onLogin} />
+            <TopHeader onGuide={onGuide} onLogin={onLogin} nickname={nickname} />
 
             <div className="relative mt-[58px] h-[760px] w-full">
               {INFO_CARDS.map((card) => (

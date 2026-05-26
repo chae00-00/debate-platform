@@ -24,7 +24,9 @@ import { prepareDebate } from './api/debatesApi';
 
 const App = () => {
   const getInitialRoute = () => {
-    if (window.location.pathname === '/login') return '/login';
+    const hasToken = !!localStorage.getItem('debate_token');
+    if (!hasToken) return '/login';
+    if (window.location.pathname === '/login') return '/';
     if (window.location.pathname === '/topics') return '/topics';
     if (window.location.pathname === '/debate') return '/debate';
     if (window.location.pathname === '/post-quiz') return '/post-quiz';
@@ -41,6 +43,7 @@ const App = () => {
   const [activeTopic, setActiveTopic] = useState(null);
   const [selectedSubTopics, setSelectedSubTopics] = useState([]);
   const [stage, setStage] = useState(0); // 0: 세부주제, 1: 참여설정, 2: 사전설문, 3: 사전퀴즈, 4: 토론
+  const [userNickname, setUserNickname] = useState(() => localStorage.getItem('debate_user_nickname') ?? null);
   const [debateMode, setDebateMode] = useState('constructive'); // 'constructive' | 'general'
   const [userStance, setUserStance] = useState(null);
   const [agentCount, setAgentCount] = useState(1);
@@ -61,7 +64,10 @@ const App = () => {
         const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
         const payload = JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
         if (payload.sub) localStorage.setItem('debate_user_id', String(payload.sub));
-        if (payload.nickname) localStorage.setItem('debate_user_nickname', String(payload.nickname));
+        if (payload.nickname) {
+          localStorage.setItem('debate_user_nickname', String(payload.nickname));
+          setUserNickname(String(payload.nickname));
+        }
       } catch {}
     }
     window.history.replaceState({}, '', '/');
@@ -214,6 +220,9 @@ const App = () => {
   }, []);
 
   const navigate = (path) => {
+    if (path !== '/login' && !localStorage.getItem('debate_token')) {
+      path = '/login';
+    }
     if (window.location.pathname !== path) {
       window.history.pushState({}, '', path);
     }
@@ -263,7 +272,7 @@ const App = () => {
       )}
 
       {!isLoginRoute && !isTopicSelectionRoute && !isDebateRoute && !isPostQuizRoute && !isStatsRoute && !isEvaluationRoute && !isGuideRoute && !activeTopic && (
-        <HomeLanding onCreateDebate={(mode) => { setDebateMode(mode ?? 'constructive'); navigate('/topics'); }} onLogin={() => navigate('/login')} onGuide={() => navigate('/guide')} />
+        <HomeLanding onCreateDebate={(mode) => { setDebateMode(mode ?? 'constructive'); navigate('/topics'); }} onLogin={() => navigate('/login')} onGuide={() => navigate('/guide')} nickname={userNickname} />
       )}
 
       {showOnboarding && (
@@ -277,7 +286,7 @@ const App = () => {
         <div className="mx-auto flex min-h-screen w-full items-start justify-center pt-6 md:items-center md:pt-0">
           <FixedStage baseWidth={1440} baseHeight={900}>
             <div className="relative h-[900px] w-[1440px]">
-              <TopHeader onGuide={() => navigate('/guide')} onLogin={() => navigate('/login')} />
+              <TopHeader onGuide={() => navigate('/guide')} onLogin={() => navigate('/login')} nickname={userNickname} />
 
               <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center pt-[96px] text-center">
                 <h1 className="text-[48px] font-extrabold leading-[55px] tracking-[-0.03em] text-[#38332E]">
