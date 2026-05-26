@@ -117,33 +117,25 @@ function SideRadarCard({ before, after, label, color, delta, avgBefore, avgAfter
   }, METRICS[0].key);
 
   const colorClass = color === 'blue'
-    ? { bg: 'bg-blue-500', text: 'text-blue-500', light: 'text-blue-100', border: 'border-blue-200', gradient: 'from-blue-500 to-blue-400' }
-    : { bg: 'bg-red-400', text: 'text-red-400', light: 'text-red-100', border: 'border-red-200', gradient: 'from-red-400 to-red-300' };
+    ? { text: 'text-blue-500', border: 'border-blue-200' }
+    : { text: 'text-red-400', border: 'border-red-200' };
 
   return (
     <div className={`flex-1 rounded-[28px] border ${colorClass.border} bg-white/90 px-5 py-5 shadow-[0_16px_40px_rgba(0,0,0,0.06)]`}>
-      {/* 헤더 + 종합 점수 */}
-      <div className={`rounded-[16px] bg-gradient-to-r ${colorClass.gradient} px-5 py-4 mb-4`}>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[18px] font-black text-white">{label} 이해도</span>
-          {delta !== null && (
-            <span className={`text-[14px] font-bold px-2 py-0.5 rounded-full ${delta > 0 ? 'bg-emerald-400 text-white' : delta < 0 ? 'bg-rose-500 text-white' : 'bg-white/30 text-white'}`}>
-              {delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}점
-            </span>
-          )}
-        </div>
-        {/* 종합 점수 크게 */}
-        <div className="flex items-center justify-center gap-4">
-          <div className="text-center">
-            <p className="text-[12px] font-bold text-white/70">사전</p>
-            <p className="text-[28px] font-black text-white/80">{avgBefore}</p>
-          </div>
-          <span className="text-[24px] font-bold text-white/60">→</span>
-          <div className="text-center">
-            <p className="text-[12px] font-bold text-white/70">사후</p>
-            <p className="text-[36px] font-black text-white">{avgAfter}</p>
-          </div>
-        </div>
+      {/* 헤더 */}
+      <div className="flex items-center justify-between mb-4">
+        <span className={`text-[18px] font-black ${colorClass.text}`}>{label} 이해도</span>
+        {delta !== null && (
+          <span className={`text-[14px] font-bold px-2 py-0.5 rounded-full ${delta > 0 ? 'bg-emerald-100 text-emerald-600' : delta < 0 ? 'bg-rose-100 text-rose-500' : 'bg-stone-100 text-stone-400'}`}>
+            {delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}점
+          </span>
+        )}
+      </div>
+      {/* 원형 게이지 */}
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <SmallGauge score={avgBefore} label="사전" isGray color={color} />
+        <span className="text-[22px] font-bold text-stone-300 mb-4">→</span>
+        <SmallGauge score={avgAfter} label="사후" color={color} />
       </div>
       {/* 범례 */}
       <div className="mb-2 flex items-center justify-center gap-4 text-[13px] font-bold text-stone-600">
@@ -156,7 +148,7 @@ function SideRadarCard({ before, after, label, color, delta, avgBefore, avgAfter
       </div>
       {/* 레이더 */}
       <div className="flex justify-center">
-        <PentagonRadar before={before} after={after} size={260} />
+        <PentagonRadar before={before} after={after} size={340} />
       </div>
       {/* 지표 리스트 */}
       <div className="mt-3 border-t border-stone-100 pt-3 space-y-2">
@@ -219,6 +211,39 @@ function SingleGauge({ score, label, isGray = false }) {
   );
 }
 
+function SmallGauge({ score, label, isGray = false, color }) {
+  const size = 190;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = 72;
+  const sw = 13;
+  const circumference = 2 * Math.PI * r;
+  const offset = circumference - (score / 100) * circumference;
+  const strokeColor = isGray ? '#D6D3D1' : (color === 'blue' ? '#3b82f6' : '#ef4444');
+  const trackColor = isGray ? '#E7E5E4' : (color === 'blue' ? '#bfdbfe' : '#fecaca');
+
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke={trackColor} strokeWidth={sw} />
+          <circle cx={cx} cy={cy} r={r} fill="none"
+            stroke={strokeColor}
+            strokeWidth={sw}
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <p className="text-[42px] font-black leading-none text-stone-800">{score}</p>
+        </div>
+      </div>
+      <p className="text-[12px] font-bold text-stone-500">{label}</p>
+    </div>
+  );
+}
+
 // ─── 메인 페이지 ─────────────────────────────────────────────────────────────
 export default function PostDebateStats({ onBack = () => {}, onNext = () => {} }) {
   const [evalData, setEvalData]   = useState(null);
@@ -226,6 +251,16 @@ export default function PostDebateStats({ onBack = () => {}, onNext = () => {} }
   const [error, setError]         = useState(null);
 
   useEffect(() => {
+    // 캐시된 평가 결과 먼저 사용
+    try {
+      const cached = JSON.parse(sessionStorage.getItem('capstone_evaluation'));
+      if (cached) {
+        setEvalData(cached);
+        setLoading(false);
+        return;
+      }
+    } catch {}
+
     let topicId;
     try {
       topicId = JSON.parse(sessionStorage.getItem('capstone_pre_quiz'))?.topicId;
@@ -291,7 +326,7 @@ export default function PostDebateStats({ onBack = () => {}, onNext = () => {} }
         <ArrowLeft size={18} />
       </button>
 
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-4xl flex-col px-5 pb-20 pt-16">
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 pb-20 pt-16">
 
         <div className="mb-8 text-center">
           <span className="mb-4 inline-block rounded-full bg-stone-800 px-5 py-1.5 text-base font-extrabold text-white">
