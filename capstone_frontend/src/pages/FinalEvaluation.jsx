@@ -209,7 +209,8 @@ function TriangleRadar({ metrics, size = 220 }) {
 }
 
 // ─── 3. 능력치 행 ─────────────────────────────────────────────────────────────
-function MetricRow({ label, icon, pro, con, user }) {
+// pro/con은 "사용자의 찬성/반대 입장 이해도"를 의미
+function MetricRow({ label, icon, pro, con, avg }) {
   const diff = pro - con;
   return (
     <div className="flex items-center justify-between rounded-[14px] bg-stone-50 px-4 py-4">
@@ -217,13 +218,13 @@ function MetricRow({ label, icon, pro, con, user }) {
         <MIcon name={icon} size={24} fill={1} className="text-stone-400" />
         <div>
           <p className="text-[16px] font-extrabold text-stone-800">{label}</p>
-          <p className="text-[14px] text-stone-400">나: <span className="font-extrabold text-emerald-600">{user}점</span></p>
+          <p className="text-[14px] text-stone-400">평균: <span className="font-extrabold text-emerald-600">{avg}점</span></p>
         </div>
       </div>
       <div className="flex items-center gap-3 shrink-0">
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-[14px] font-bold text-blue-500 w-6 text-right">찬</span>
+            <span className="text-[12px] font-bold text-blue-500 w-14 text-right">찬성 이해</span>
             <div className="relative h-4 w-24 rounded-full bg-stone-200 overflow-hidden">
               <div className="absolute left-0 top-0 h-full rounded-full"
                 style={{ width: `${pro}%`, background: 'linear-gradient(90deg,#3b82f6,#93c5fd)' }} />
@@ -231,7 +232,7 @@ function MetricRow({ label, icon, pro, con, user }) {
             <span className="text-[15px] font-extrabold text-blue-600 w-8 text-right">{pro}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[14px] font-bold text-red-400 w-6 text-right">반</span>
+            <span className="text-[12px] font-bold text-red-400 w-14 text-right">반대 이해</span>
             <div className="relative h-4 w-24 rounded-full bg-stone-200 overflow-hidden">
               <div className="absolute left-0 top-0 h-full rounded-full"
                 style={{ width: `${con}%`, background: 'linear-gradient(90deg,#ef4444,#fca5a5)' }} />
@@ -435,52 +436,52 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
   const finalIsPro  = hasScores ? proAvg >= conAvg : finalProPct >= 50;
   const winnerComment = evalData
     ? (finalIsPro
-        ? `찬성 측이 ${proAvg}점으로 반대 측(${conAvg}점)보다 높은 논증력을 보였습니다.`
-        : `반대 측이 ${conAvg}점으로 찬성 측(${proAvg}점)보다 높은 논증력을 보였습니다.`)
+        ? `찬성 입장 이해도(${proAvg}점)가 반대 입장 이해도(${conAvg}점)보다 높습니다.`
+        : `반대 입장 이해도(${conAvg}점)가 찬성 입장 이해도(${proAvg}점)보다 높습니다.`)
     : WINNER_COMMENT;
 
-  // 3지표 배열 (평가 있으면 API, 없으면 mock)
+  // 3지표 배열: pro/con은 "사용자의 찬성/반대 입장 이해도"
   const metricsData = [
     { key: 'argument', label: '논증력', icon: 'psychology',
       pro: evalData ? proMetrics.argument : 62,
       con: evalData ? conMetrics.argument : 81,
-      user: evalData ? Math.round((proMetrics.argument + conMetrics.argument) / 2) : 82 },
+      avg: evalData ? Math.round((proMetrics.argument + conMetrics.argument) / 2) : 82 },
     { key: 'evidence', label: '근거력', icon: 'attach_file',
       pro: evalData ? proMetrics.evidence : 54,
       con: evalData ? conMetrics.evidence : 78,
-      user: evalData ? Math.round((proMetrics.evidence + conMetrics.evidence) / 2) : 71 },
+      avg: evalData ? Math.round((proMetrics.evidence + conMetrics.evidence) / 2) : 71 },
     { key: 'language', label: '언어력', icon: 'record_voice_over',
       pro: evalData ? proMetrics.language : 75,
       con: evalData ? conMetrics.language : 57,
-      user: evalData ? Math.round((proMetrics.language + conMetrics.language) / 2) : 75 },
+      avg: evalData ? Math.round((proMetrics.language + conMetrics.language) / 2) : 75 },
   ];
 
   // AI 코치 피드백
   const feedbackMetrics = [
     {
       key: 'argument', label: '논증력', icon: 'psychology',
-      score: metricsData[0].user,
+      score: metricsData[0].avg,
       best:     { turn: '-', summary: proPost?.reasoning_density?.label ?? '논리 추론',    praise:  proPost?.reasoning_density?.reason ?? USER_FEEDBACK_METRICS[0].best.praise },
       worst:    { turn: '-', summary: conPost?.knowledge_specificity?.label ?? '지식 구체성', critique: conPost?.knowledge_specificity?.reason ?? USER_FEEDBACK_METRICS[0].worst.critique },
       suggestion: evalData ? (proPost?.overall_summary ?? USER_FEEDBACK_METRICS[0].suggestion) : USER_FEEDBACK_METRICS[0].suggestion,
     },
     {
       key: 'evidence', label: '근거력', icon: 'attach_file',
-      score: metricsData[1].user,
+      score: metricsData[1].avg,
       best:     { turn: '-', summary: proPost?.evidence_expansion?.label ?? '근거 확장',    praise:  proPost?.evidence_expansion?.reason ?? USER_FEEDBACK_METRICS[1].best.praise },
       worst:    { turn: '-', summary: conPost?.evidence_validity?.label ?? '근거 타당성',    critique: conPost?.evidence_validity?.reason ?? USER_FEEDBACK_METRICS[1].worst.critique },
       suggestion: evalData ? (conPost?.overall_summary ?? USER_FEEDBACK_METRICS[1].suggestion) : USER_FEEDBACK_METRICS[1].suggestion,
     },
     {
       key: 'language', label: '언어력', icon: 'record_voice_over',
-      score: metricsData[2].user,
+      score: metricsData[2].avg,
       best:     { turn: '-', summary: proPost?.perspective_diversity?.label ?? '관점 다각성', praise:  proPost?.perspective_diversity?.reason ?? USER_FEEDBACK_METRICS[2].best.praise },
       worst:    { turn: '-', summary: conPost?.perspective_diversity?.label ?? '관점 다각성', critique: conPost?.perspective_diversity?.reason ?? USER_FEEDBACK_METRICS[2].worst.critique },
       suggestion: evalData ? (proPost?.overall_summary ?? USER_FEEDBACK_METRICS[2].suggestion) : USER_FEEDBACK_METRICS[2].suggestion,
     },
   ];
 
-  const mvpScore = evalData ? Math.max(...metricsData.map(m => m.user)) : MVP.score;
+  const mvpScore = evalData ? Math.max(...metricsData.map(m => m.avg)) : MVP.score;
   const mvpSide  = finalIsPro ? 'pro' : 'con';
 
   return (
@@ -541,15 +542,15 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
 
           {/* 능력치 및 데이터 분석 */}
           <div className="rounded-[36px] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,245,244,0.94))] px-7 py-7 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
-            <h3 className="mb-1 text-[20px] font-extrabold text-stone-800">능력치 및 데이터 분석</h3>
-            <p className="mb-5 text-[14px] text-stone-400">전체 턴 평균 · 3개 지표 진영 비교</p>
+            <h3 className="mb-1 text-[20px] font-extrabold text-stone-800">양측 입장 이해도 분석</h3>
+            <p className="mb-5 text-[14px] text-stone-400">토론 후 · 찬성/반대 입장 이해도 비교</p>
             {evalLoading || !evalData ? <Calculating /> : (
               <>
                 <div className="flex flex-col items-center mb-5">
                   <TriangleRadar metrics={metricsData} size={220} />
                   <div className="mt-3 flex items-center gap-5 text-[13px] font-bold text-stone-600">
-                    <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-blue-400"/>찬성</span>
-                    <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-red-400"/>반대</span>
+                    <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-blue-400"/>찬성 이해도</span>
+                    <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-red-400"/>반대 이해도</span>
                   </div>
                 </div>
                 <div className="border-t border-stone-100 pt-4 space-y-2.5">
