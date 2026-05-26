@@ -20,7 +20,7 @@ function phaseToScores(phase) {
   if (!phase) return null;
   const result = {};
   for (const m of METRICS) {
-    result[m.key] = phase[m.apiKey]?.score ?? 0;
+    result[m.key] = phase.scores?.[m.apiKey]?.score ?? 0;
   }
   return result;
 }
