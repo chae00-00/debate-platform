@@ -35,20 +35,20 @@ public class EvaluationResponse {
     @Getter
     @NoArgsConstructor
     public static class PhaseResult {
-        @JsonProperty("evidence_expansion")
-        private MetricScore evidenceExpansion;
+        @JsonProperty("local_acceptability")
+        private MetricScore localAcceptability;
 
-        @JsonProperty("knowledge_specificity")
-        private MetricScore knowledgeSpecificity;
+        @JsonProperty("local_relevance")
+        private MetricScore localRelevance;
 
-        @JsonProperty("evidence_validity")
-        private MetricScore evidenceValidity;
+        @JsonProperty("local_sufficiency")
+        private MetricScore localSufficiency;
 
-        @JsonProperty("reasoning_density")
-        private MetricScore reasoningDensity;
+        @JsonProperty("clarity")
+        private MetricScore clarity;
 
-        @JsonProperty("perspective_diversity")
-        private MetricScore perspectiveDiversity;
+        @JsonProperty("appropriateness")
+        private MetricScore appropriateness;
 
         @JsonProperty("average_100")
         private Double average100;
