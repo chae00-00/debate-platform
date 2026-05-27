@@ -4,11 +4,11 @@ import BackgroundBubbles from '../components/BackgroundBubbles';
 import { fetchEvaluation } from '../api/evaluationApi';
 
 const METRICS = [
-  { key: 'depth',       label: '근거 확장성',   desc: '각 근거가 얼마나 구체적이고 정보량이 풍부한지',   apiKey: 'evidence_expansion' },
-  { key: 'specificity', label: '지식의 구체성', desc: '주장 뒤에 데이터, 구체적인 사례, 고유명사, 수치 등이 포함되었는지', apiKey: 'knowledge_specificity' },
-  { key: 'support',     label: '근거 타당성',   desc: '제시된 근거가 최종 결론을 얼마나 잘 뒷받침하는지', apiKey: 'evidence_validity' },
-  { key: 'inference',   label: '논리 추론 밀도', desc: '근거와 결론 사이의 논리 연결이 얼마나 자연스럽고 탄탄한지', apiKey: 'reasoning_density' },
-  { key: 'diversity',   label: '관점 다각성',   desc: '제시된 근거의 관점이 얼마나 다양한지',             apiKey: 'perspective_diversity' },
+  { key: 'depth',       label: '수용 가능성', desc: '주장이 해당 맥락에서 얼마나 수용될 수 있는지', apiKey: 'local_acceptability' },
+  { key: 'specificity', label: '관련성',      desc: '제시된 근거가 주제와 얼마나 관련이 있는지',   apiKey: 'local_relevance' },
+  { key: 'support',     label: '충분성',      desc: '제시된 근거가 주장을 충분히 뒷받침하는지',    apiKey: 'local_sufficiency' },
+  { key: 'inference',   label: '명확성',      desc: '주장과 근거가 얼마나 명확하게 전달되는지',    apiKey: 'clarity' },
+  { key: 'diversity',   label: '적절성',      desc: '사용된 표현과 논거가 얼마나 적절한지',        apiKey: 'appropriateness' },
 ];
 
 const MOCK_SCORES = {

@@ -373,15 +373,15 @@ function FeedbackCard({ metric }) {
 // ─── 평가 데이터 → 3지표 매핑 ─────────────────────────────────────────────────
 function mapToTriMetrics(phase) {
   if (!phase) return { argument: 0, evidence: 0, language: 0 };
-  const rd  = (phase.reasoning_density?.score ?? 0) * 20;
-  const ks  = (phase.knowledge_specificity?.score ?? 0) * 20;
-  const ee  = (phase.evidence_expansion?.score ?? 0) * 20;
-  const ev  = (phase.evidence_validity?.score ?? 0) * 20;
-  const pd  = (phase.perspective_diversity?.score ?? 0) * 20;
+  const cl  = (phase.clarity?.score ?? 0) * 20;
+  const lr  = (phase.local_relevance?.score ?? 0) * 20;
+  const la  = (phase.local_acceptability?.score ?? 0) * 20;
+  const ls  = (phase.local_sufficiency?.score ?? 0) * 20;
+  const ap  = (phase.appropriateness?.score ?? 0) * 20;
   return {
-    argument: Math.round((rd + ks) / 2),
-    evidence: Math.round((ee + ev) / 2),
-    language: Math.round(pd),
+    argument: Math.round((cl + lr) / 2),
+    evidence: Math.round((la + ls) / 2),
+    language: Math.round(ap),
   };
 }
 
@@ -461,22 +461,22 @@ export default function FinalEvaluation({ onBack = () => {}, onExit = () => {}, 
     {
       key: 'argument', label: '논증력', icon: 'psychology',
       score: metricsData[0].avg,
-      best:     { turn: '-', summary: proPost?.reasoning_density?.label ?? '논리 추론',    praise:  proPost?.reasoning_density?.reason ?? USER_FEEDBACK_METRICS[0].best.praise },
-      worst:    { turn: '-', summary: conPost?.knowledge_specificity?.label ?? '지식 구체성', critique: conPost?.knowledge_specificity?.reason ?? USER_FEEDBACK_METRICS[0].worst.critique },
+      best:     { turn: '-', summary: proPost?.clarity?.label ?? '명확성',       praise:   proPost?.clarity?.reason ?? USER_FEEDBACK_METRICS[0].best.praise },
+      worst:    { turn: '-', summary: conPost?.local_relevance?.label ?? '관련성', critique: conPost?.local_relevance?.reason ?? USER_FEEDBACK_METRICS[0].worst.critique },
       suggestion: evalData ? (proPost?.overall_summary ?? USER_FEEDBACK_METRICS[0].suggestion) : USER_FEEDBACK_METRICS[0].suggestion,
     },
     {
       key: 'evidence', label: '근거력', icon: 'attach_file',
       score: metricsData[1].avg,
-      best:     { turn: '-', summary: proPost?.evidence_expansion?.label ?? '근거 확장',    praise:  proPost?.evidence_expansion?.reason ?? USER_FEEDBACK_METRICS[1].best.praise },
-      worst:    { turn: '-', summary: conPost?.evidence_validity?.label ?? '근거 타당성',    critique: conPost?.evidence_validity?.reason ?? USER_FEEDBACK_METRICS[1].worst.critique },
+      best:     { turn: '-', summary: proPost?.local_acceptability?.label ?? '수용 가능성', praise:   proPost?.local_acceptability?.reason ?? USER_FEEDBACK_METRICS[1].best.praise },
+      worst:    { turn: '-', summary: conPost?.local_sufficiency?.label ?? '충분성',       critique: conPost?.local_sufficiency?.reason ?? USER_FEEDBACK_METRICS[1].worst.critique },
       suggestion: evalData ? (conPost?.overall_summary ?? USER_FEEDBACK_METRICS[1].suggestion) : USER_FEEDBACK_METRICS[1].suggestion,
     },
     {
       key: 'language', label: '언어력', icon: 'record_voice_over',
       score: metricsData[2].avg,
-      best:     { turn: '-', summary: proPost?.perspective_diversity?.label ?? '관점 다각성', praise:  proPost?.perspective_diversity?.reason ?? USER_FEEDBACK_METRICS[2].best.praise },
-      worst:    { turn: '-', summary: conPost?.perspective_diversity?.label ?? '관점 다각성', critique: conPost?.perspective_diversity?.reason ?? USER_FEEDBACK_METRICS[2].worst.critique },
+      best:     { turn: '-', summary: proPost?.appropriateness?.label ?? '적절성', praise:   proPost?.appropriateness?.reason ?? USER_FEEDBACK_METRICS[2].best.praise },
+      worst:    { turn: '-', summary: conPost?.appropriateness?.label ?? '적절성', critique: conPost?.appropriateness?.reason ?? USER_FEEDBACK_METRICS[2].worst.critique },
       suggestion: evalData ? (proPost?.overall_summary ?? USER_FEEDBACK_METRICS[2].suggestion) : USER_FEEDBACK_METRICS[2].suggestion,
     },
   ];
