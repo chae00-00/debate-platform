@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { ExternalLink, ChevronRight } from 'lucide-react';
 import { getSurveyUrl } from '../config/surveyLinks';
 
 const PreSurvey = ({ visible, topicId, activeData, selectedSubTopics = [], userStance, debateMode = 'constructive', onComplete }) => {
+  const [surveyOpened, setSurveyOpened] = useState(false);
+
   const selected = selectedSubTopics[0];
   const selectedTitle = selected?.title ?? selected;
   const selectedSubTopic = selected?.title
@@ -14,6 +17,7 @@ const PreSurvey = ({ visible, topicId, activeData, selectedSubTopics = [], userS
     const stance = userStance === 'pro' ? 'PRO' : userStance === 'con' ? 'CON' : '';
     const url = getSurveyUrl({ debateMode, timing: 'pre', nickname, topic: topicLabel, stance });
     window.open(url, '_blank', 'noopener,noreferrer');
+    setSurveyOpened(true);
   };
 
   return (
@@ -60,7 +64,12 @@ const PreSurvey = ({ visible, topicId, activeData, selectedSubTopics = [], userS
 
             <button
               onClick={onComplete}
-              className="rounded-full px-8 py-4 text-base font-bold transition-all duration-300 border border-stone-300 bg-white text-stone-700 hover:scale-105 hover:border-stone-400"
+              disabled={!surveyOpened}
+              className={`rounded-full px-8 py-4 text-base font-bold transition-all duration-300 border ${
+                surveyOpened
+                  ? 'border-stone-300 bg-white text-stone-700 hover:scale-105 hover:border-stone-400'
+                  : 'border-stone-200 bg-stone-100 text-stone-400 cursor-not-allowed'
+              }`}
             >
               다음 단계
             </button>
