@@ -50,12 +50,12 @@ services:
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin@debate.com
       - PGADMIN_DEFAULT_PASSWORD=admin123
-      - PGADMIN_SERVER_JSON_FILE=/pgadmin4/servers.json
     volumes:
-      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
     restart: unless-stopped
 
 volumes:
   postgres_data:
+  pgadmin_data:
