@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "debate_db",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "debate_db",
+      "Username": "debate_user",
+      "SSLMode": "prefer"
+    }
+  }
+}
