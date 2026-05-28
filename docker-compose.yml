@@ -21,7 +21,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=debate_user
       - SPRING_DATASOURCE_PASSWORD=debate_pass
       - OAUTH_REDIRECT_URI=http://debate-mate.ai.kr/oauth/callback
-      - FASTAPI_URL=https://cricket-hugo-place-site.trycloudflare.com
+      - FASTAPI_URL=https://surrey-logged-thousand-buried.trycloudflare.com
       - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
       - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
       - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
