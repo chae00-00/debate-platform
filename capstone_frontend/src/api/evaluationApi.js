@@ -9,10 +9,15 @@ const formatQuizText = (quizSide) => {
 };
 
 export const fetchEvaluation = (topicId) => {
-  let preQuiz, postQuiz;
+  let preQuiz, postQuiz, sessionId;
   try {
     preQuiz  = JSON.parse(sessionStorage.getItem('capstone_pre_quiz'))?.data;
     postQuiz = JSON.parse(sessionStorage.getItem('capstone_post_quiz'));
+    sessionId = sessionStorage.getItem('capstone_debate_session_id');
+    if (!sessionId) {
+      const session = JSON.parse(sessionStorage.getItem('capstone_debate_session'));
+      sessionId = session?.sessionId;
+    }
   } catch {
     return Promise.reject(new Error('퀴즈 데이터를 찾을 수 없습니다.'));
   }
@@ -21,7 +26,11 @@ export const fetchEvaluation = (topicId) => {
     return Promise.reject(new Error('퀴즈 데이터를 찾을 수 없습니다.'));
   }
 
-  return apiFetch(`/api/evaluation?topicId=${topicId}`, {
+  if (!sessionId) {
+    return Promise.reject(new Error('세션 ID를 찾을 수 없습니다.'));
+  }
+
+  return apiFetch(`/api/evaluation?topicId=${topicId}&sessionId=${sessionId}`, {
     method: 'POST',
     body: JSON.stringify({
       pre_pro:  formatQuizText(preQuiz.pro),

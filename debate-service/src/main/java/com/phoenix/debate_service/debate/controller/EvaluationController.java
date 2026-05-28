@@ -16,13 +16,14 @@ public class EvaluationController {
 
     /**
      * 토론 전후 사용자 답변 평가
-     * POST /api/evaluation?topicId=poli_002
+     * POST /api/evaluation?topicId=poli_002&sessionId=123
      */
     @PostMapping
     public ResponseEntity<EvaluationResponse> evaluate(
             @RequestParam String topicId,
+            @RequestParam Long sessionId,
             @RequestBody EvaluationRequest request
     ) {
-        return ResponseEntity.ok(evaluationService.evaluate(topicId, request));
+        return ResponseEntity.ok(evaluationService.evaluate(topicId, sessionId, request));
     }
 }
