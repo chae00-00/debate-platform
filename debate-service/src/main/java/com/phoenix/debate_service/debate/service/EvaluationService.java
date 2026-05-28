@@ -23,11 +23,11 @@ public class EvaluationService {
     private final EvaluationResultRepository evaluationResultRepository;
 
     @Transactional
-    public EvaluationResponse evaluate(String topicId, Long sessionId, EvaluationRequest request) {
+    public EvaluationResponse evaluate(String topicId, String sessionId, EvaluationRequest request) {
         log.info("[evaluation] topicId={} sessionId={} 평가 요청", topicId, sessionId);
 
-        // 1. 세션 조회
-        DebateSession session = sessionRepository.findById(sessionId)
+        // 1. 세션 조회 (fastApiSessionId로 조회)
+        DebateSession session = sessionRepository.findByFastApiSessionId(sessionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "세션을 찾을 수 없습니다: " + sessionId));
 
         // 2. 사전/사후 답변 저장

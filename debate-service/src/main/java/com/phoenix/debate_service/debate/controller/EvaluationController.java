@@ -21,7 +21,7 @@ public class EvaluationController {
     @PostMapping
     public ResponseEntity<EvaluationResponse> evaluate(
             @RequestParam String topicId,
-            @RequestParam Long sessionId,
+            @RequestParam String sessionId,
             @RequestBody EvaluationRequest request
     ) {
         return ResponseEntity.ok(evaluationService.evaluate(topicId, sessionId, request));
