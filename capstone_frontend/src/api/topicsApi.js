@@ -10,9 +10,9 @@ const buildTopicsWithApiData = (categories) => {
       subTopics: apiSubTopics.map((sub) => ({
         id: sub.id,
         title: sub.title,
-        description: sub.descriptionShort ?? sub.description ?? '',
-        description_short: sub.descriptionShort ?? sub.description ?? '',
-        description_long: sub.descriptionLong ?? '',
+        description: sub.description_short ?? sub.descriptionShort ?? sub.description ?? '',
+        description_short: sub.description_short ?? sub.descriptionShort ?? sub.description ?? '',
+        description_long: sub.description_long ?? sub.descriptionLong ?? '',
         pro: sub.pro,
         con: sub.con,
         references: sub.references ?? [],
