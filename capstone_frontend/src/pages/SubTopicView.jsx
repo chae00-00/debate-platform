@@ -119,12 +119,9 @@ const SubTopicView = ({ activeData, selectedSubTopics, onToggle, visible }) => {
                         onMouseEnter={() => setOpenTip(sub.title)}
                         onMouseLeave={() => setOpenTip(null)}
                         className="absolute left-0 right-0 top-full mt-2 z-50 bg-white rounded-2xl shadow-xl border border-stone-100 px-5 py-4 text-sm text-stone-600 leading-relaxed max-h-[300px] overflow-y-auto">
-                        {/* 긴 설명 */}
-                        {sub.description_long && (
-                          <p className="mb-3">{sub.description_long}</p>
-                        )}
-                        {!sub.description_long && sub.description && (
-                          <p className="mb-3">{sub.description}</p>
+                        {/* 짧은 설명 */}
+                        {(sub.description_short || sub.description) && (
+                          <p className="mb-3">{sub.description_short || sub.description}</p>
                         )}
 
                         {/* 찬반 입장 */}
