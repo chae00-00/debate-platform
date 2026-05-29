@@ -45,7 +45,7 @@ jobs:
               curl -SL https://github.com/docker/buildx/releases/download/v0.14.1/buildx-v0.14.1.linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
               chmod +x ~/.docker/cli-plugins/docker-buildx
             fi
-            DOCKER_BUILDKIT=1 docker-compose build
+            DOCKER_BUILDKIT=1 docker-compose build --no-cache
             docker-compose up -d
             docker image prune -f
             df -h
