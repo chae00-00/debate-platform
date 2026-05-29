@@ -21,6 +21,7 @@ import FinalEvaluation from './pages/FinalEvaluation';
 import ServiceIntroPage from './pages/ServiceIntroPage';
 import Login from './pages/Login';
 import { prepareDebate } from './api/debatesApi';
+import { logout } from './api/index';
 
 const App = () => {
   const getInitialRoute = () => {
@@ -288,7 +289,7 @@ const App = () => {
         <div className="mx-auto flex min-h-screen w-full items-start justify-center pt-6 md:items-center md:pt-0">
           <FixedStage baseWidth={1440} baseHeight={900}>
             <div className="relative h-[900px] w-[1440px]">
-              <TopHeader onGuide={() => navigate('/guide')} onLogin={() => navigate('/login')} nickname={userNickname} />
+              <TopHeader onGuide={() => navigate('/guide')} onLogin={() => navigate('/login')} onLogout={async () => { await logout(); setUserNickname(null); navigate('/login'); }} nickname={userNickname} />
 
               <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center pt-[96px] text-center">
                 <h1 className="text-[48px] font-extrabold leading-[55px] tracking-[-0.03em] text-[#38332E]">

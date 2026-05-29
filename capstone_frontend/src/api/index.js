@@ -5,8 +5,11 @@ export const BASE_URL = import.meta.env.VITE_API_URL || '';
 export const buildApiUrl = (path) => `${BASE_URL}${path}`;
 
 export const apiFetch = async (path, options = {}) => {
+  const token = localStorage.getItem('debate_token');
+  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
   const res = await fetch(buildApiUrl(path), {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: { 'Content-Type': 'application/json', ...authHeader, ...options.headers },
     ...options,
   });
   if (!res.ok) {
@@ -23,4 +26,12 @@ export const apiFetch = async (path, options = {}) => {
     throw new Error(`API error ${res.status}: ${path}${detail}`);
   }
   return res.json();
+};
+
+export const logout = async () => {
+  try {
+    await fetch(buildApiUrl('/api/auth/logout'), { method: 'POST' });
+  } catch {}
+  localStorage.removeItem('debate_token');
+  localStorage.removeItem('debate_user_nickname');
 };
