@@ -275,7 +275,7 @@ const App = () => {
       )}
 
       {!isLoginRoute && !isTopicSelectionRoute && !isDebateRoute && !isPostQuizRoute && !isStatsRoute && !isEvaluationRoute && !isGuideRoute && !activeTopic && (
-        <HomeLanding onCreateDebate={(mode) => { const m = mode ?? 'constructive'; sessionStorage.setItem('capstone_debate_mode', m); setDebateMode(m); navigate('/topics'); }} onLogin={() => navigate('/login')} onGuide={() => navigate('/guide')} nickname={userNickname} />
+        <HomeLanding onCreateDebate={(mode) => { const m = mode ?? 'constructive'; sessionStorage.setItem('capstone_debate_mode', m); setDebateMode(m); navigate('/topics'); }} onLogin={() => navigate('/login')} onLogout={async () => { await logout(); setUserNickname(null); navigate('/login'); }} onGuide={() => navigate('/guide')} nickname={userNickname} />
       )}
 
       {showOnboarding && (
