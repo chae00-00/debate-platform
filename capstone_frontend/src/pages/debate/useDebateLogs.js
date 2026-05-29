@@ -425,9 +425,11 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
       const sseUrl = effectivePreparedId
         ? buildApiUrl(`/api/debates/${effectivePreparedId}/stream`)
         : buildApiUrl('/api/debates');
+      const token = localStorage.getItem('debate_token');
+      const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
       const sseOptions = effectivePreparedId
-        ? { method: 'GET', headers: { Accept: 'text/event-stream' } }
-        : { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' }, body: JSON.stringify(debateParams) };
+        ? { method: 'GET', headers: { Accept: 'text/event-stream', ...authHeader } }
+        : { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream', ...authHeader }, body: JSON.stringify(debateParams) };
 
       try {
         for await (const { type, data } of readSSE(
@@ -614,12 +616,14 @@ export function useDebateLogs(debateParams, agentCount = 2, userStance = 'pro', 
       const ctrl = new AbortController();
       abortRef.current = ctrl;
 
+      const token = localStorage.getItem('debate_token');
+      const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
       try {
         for await (const { type, data } of readSSE(
           buildApiUrl(`/api/debates/${sid}/submit`),
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+            headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream', ...authHeader },
             body: JSON.stringify({
             content: normalizedContent,
             ...(opponentId && !isChained ? { targetId: opponentId } : {}),
