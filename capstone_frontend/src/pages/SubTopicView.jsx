@@ -100,10 +100,12 @@ const SubTopicView = ({ activeData, selectedSubTopics, onToggle, visible }) => {
                       <p className={`font-semibold text-base leading-snug flex-1 ${isSelected ? 'text-white' : 'text-stone-800'}`}>
                         {sub.title}
                       </p>
-                      {sub.description && (
+                      {(sub.description || sub.description_long || sub.pro || sub.con) && (
                         <span
                           onClick={(e) => { e.stopPropagation(); setOpenTip(isOpen ? null : sub.title); }}
-                          className={`shrink-0 transition-colors ${
+                          onMouseEnter={() => setOpenTip(sub.title)}
+                          onMouseLeave={() => setOpenTip(null)}
+                          className={`shrink-0 transition-colors cursor-help ${
                             isOpen ? 'text-stone-400' : isSelected ? 'text-stone-400 hover:text-stone-200' : 'text-stone-300 hover:text-stone-500'
                           }`}
                         >
@@ -112,9 +114,58 @@ const SubTopicView = ({ activeData, selectedSubTopics, onToggle, visible }) => {
                       )}
                     </div>
 
-                    {isOpen && sub.description && (
-                      <div className="absolute left-0 right-0 top-full mt-2 z-50 bg-white rounded-2xl shadow-xl border border-stone-100 px-5 py-4 text-sm text-stone-500 leading-relaxed">
-                        {sub.description}
+                    {isOpen && (
+                      <div
+                        onMouseEnter={() => setOpenTip(sub.title)}
+                        onMouseLeave={() => setOpenTip(null)}
+                        className="absolute left-0 right-0 top-full mt-2 z-50 bg-white rounded-2xl shadow-xl border border-stone-100 px-5 py-4 text-sm text-stone-600 leading-relaxed max-h-[300px] overflow-y-auto">
+                        {/* 긴 설명 */}
+                        {sub.description_long && (
+                          <p className="mb-3">{sub.description_long}</p>
+                        )}
+                        {!sub.description_long && sub.description && (
+                          <p className="mb-3">{sub.description}</p>
+                        )}
+
+                        {/* 찬반 입장 */}
+                        {(sub.pro || sub.con) && (
+                          <div className="flex gap-3 mb-3">
+                            {sub.pro && (
+                              <div className="flex-1 bg-blue-50 rounded-lg px-3 py-2">
+                                <span className="text-xs font-bold text-blue-500">찬성</span>
+                                <p className="text-xs text-blue-700 mt-1">{sub.pro}</p>
+                              </div>
+                            )}
+                            {sub.con && (
+                              <div className="flex-1 bg-red-50 rounded-lg px-3 py-2">
+                                <span className="text-xs font-bold text-red-400">반대</span>
+                                <p className="text-xs text-red-600 mt-1">{sub.con}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 참고 자료 */}
+                        {sub.references && sub.references.length > 0 && (
+                          <div className="border-t border-stone-100 pt-2">
+                            <span className="text-xs font-bold text-stone-400">참고 자료</span>
+                            <ul className="mt-1 space-y-1">
+                              {sub.references.map((ref, idx) => (
+                                <li key={idx}>
+                                  <a
+                                    href={ref.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-blue-500 hover:underline"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {ref.title}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
