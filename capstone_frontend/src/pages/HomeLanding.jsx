@@ -1,18 +1,29 @@
 import React, { useState } from 'react';
+import { ArrowUpRight, BarChart3, Trophy } from 'lucide-react';
 import TopHeader from '../components/TopHeader';
 import FixedStage from '../components/FixedStage';
+import { TOPICS } from '../data/topics';
 
-const INFO_CARDS = [
-  {
-    id: 'summary-1',
-    text: '최근 5개 토론\n이해도 그래프/\n나의 입장변화 /승률 등\n수치화 가능 데이터',
-    className: 'left-[96px] top-[166px] h-[246px] w-[494px]',
-  },
-  {
-    id: 'summary-2',
-    text: '최근 5개 토론\n이해도 그래프/\n나의 입장변화 /승률 등',
-    className: 'left-[96px] top-[446px] h-[246px] w-[494px]',
-  },
+const RECENT_DEBATES = TOPICS.flatMap((topic) =>
+  topic.subTopics.slice(0, 2).map((subTopic) => ({
+    topicId: topic.id,
+    category: topic.title,
+    accent: topic.accent,
+    ...subTopic,
+  })),
+).slice(0, 3);
+
+const REPORT_METRICS = [
+  { label: '수용 가능성', desc: '맥락에서 수용될 수 있는 주장인지', score: 4, color: '#4A8768' },
+  { label: '관련성', desc: '근거가 주제와 직접 연결되는지', score: 3, color: '#31465D' },
+  { label: '충분성', desc: '근거가 주장을 충분히 뒷받침하는지', score: 4, color: '#6F4141' },
+  { label: '명확성', desc: '주장과 근거가 명확하게 전달되는지', score: 3, color: '#A8793D' },
+];
+
+const FINAL_METRICS = [
+  '논증력',
+  '근거력',
+  '언어력',
 ];
 
 const ACTION_BUBBLES = [
@@ -67,16 +78,96 @@ const HomeLanding = ({ onCreateDebate, onLogin, onLogout, onGuide, nickname }) =
             <TopHeader onGuide={onGuide} onLogin={onLogin} onLogout={onLogout} nickname={nickname} />
 
             <div className="relative mt-[58px] h-[760px] w-full">
-              {INFO_CARDS.map((card) => (
-                <div
-                  key={card.id}
-                  className={`absolute rounded-[36px] bg-[#D9D9D9]/92 px-10 py-8 text-center text-[28px] font-medium leading-[1.35] tracking-[-0.03em] text-black shadow-[0_10px_24px_rgba(0,0,0,0.06)] ${card.className}`}
-                >
-                  {card.text.split('\n').map((line) => (
-                    <div key={line}>{line}</div>
+              <section className="absolute left-[96px] top-[112px] h-[322px] w-[520px] rounded-[28px] bg-white/88 px-8 py-7 text-[#25231F] shadow-[0_16px_42px_rgba(38,32,25,0.12)] ring-1 ring-black/5 backdrop-blur">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[15px] font-bold leading-none text-[#4A8768]">최근 선택 논제</p>
+                    <h2 className="mt-2 text-[28px] font-extrabold leading-[32px] tracking-[-0.02em]">
+                      서비스 주제 미리보기
+                    </h2>
+                  </div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#4A8768]/12 text-[#4A8768]">
+                    <BarChart3 size={25} strokeWidth={2.5} />
+                  </div>
+                </div>
+
+                <div className="mt-6 space-y-4">
+                  {RECENT_DEBATES.map((debate, index) => (
+                    <div key={`${debate.topicId}-${debate.title}`} className="grid grid-cols-[28px_1fr_64px] items-center gap-3">
+                      <span
+                        className="flex h-7 w-7 items-center justify-center rounded-full text-[12px] font-extrabold text-white"
+                        style={{ backgroundColor: debate.accent }}
+                      >
+                        {index + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="line-clamp-1 text-[15px] font-extrabold leading-[18px]">{debate.title}</p>
+                        <p className="mt-1 line-clamp-1 text-[12px] font-bold text-[#7A7169]">
+                          찬성: {debate.pro}
+                          <span className="mx-1.5 text-[#B0A8A0]">/</span>
+                          반대: {debate.con}
+                        </p>
+                      </div>
+                      <span className="rounded-full bg-[#F2EEE8] px-2.5 py-1.5 text-center text-[11px] font-extrabold text-[#686159]">
+                        {debate.category}
+                      </span>
+                    </div>
                   ))}
                 </div>
-              ))}
+
+                <div className="mt-6 flex items-center justify-between rounded-[16px] bg-[#F2EEE8] px-5 py-4">
+                  <span className="text-[13px] font-extrabold text-[#7A7169]">최종 평가 항목</span>
+                  <div className="flex gap-2">
+                    {FINAL_METRICS.map((metric) => (
+                      <span key={metric} className="rounded-full bg-white px-3 py-1.5 text-[12px] font-extrabold text-[#25231F] shadow-sm">
+                        {metric}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              <section className="absolute left-[96px] top-[456px] h-[286px] w-[520px] rounded-[28px] bg-white/88 px-8 py-7 text-[#25231F] shadow-[0_16px_42px_rgba(38,32,25,0.12)] ring-1 ring-black/5 backdrop-blur">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[15px] font-bold leading-none text-[#6F4141]">토론 전후 리포트</p>
+                    <h2 className="mt-2 text-[27px] font-extrabold leading-[31px] tracking-[-0.02em]">
+                      평가 지표
+                    </h2>
+                  </div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#6F4141]/12 text-[#6F4141]">
+                    <Trophy size={25} strokeWidth={2.5} />
+                  </div>
+                </div>
+
+                <div className="mt-5 space-y-2.5">
+                  {REPORT_METRICS.map((metric) => (
+                    <div key={metric.label} className="grid grid-cols-[92px_1fr_44px] items-center gap-3">
+                      <p className="text-[15px] font-extrabold leading-[18px]">{metric.label}</p>
+                      <div className="min-w-0">
+                        <p className="truncate text-[12px] font-bold text-[#7A7169]">{metric.desc}</p>
+                        <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-[#E7E0D7]">
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${metric.score * 20}%`,
+                              backgroundColor: metric.color,
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <span className="text-right text-[15px] font-extrabold text-[#25231F]">
+                        {metric.score}/5
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-5 flex items-center gap-2 text-[13px] font-bold leading-[18px] text-[#7A7169]">
+                  <ArrowUpRight size={18} strokeWidth={2.5} />
+                  <span>토론 전후 변화는 위 지표를 기준으로 리포트에 정리됩니다.</span>
+                </div>
+              </section>
 
               {ACTION_BUBBLES.map((bubble) => (
                 <div
